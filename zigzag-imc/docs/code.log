@@ -1,0 +1,20 @@
+
+#05/07/2023:
+	.[fix] utilization constraint of 50% is removed from mapping generator.
+		.[reason] Previously it was added to speed up the simulation time. However, I found when simulate on AutoEncoder workload, there will be no output information for some layers when all possible combinations cannot reach 50% utilization. The calculation of total energy in zigzag is looped across all layers in the output cme_list. Due to some layers are missing, therefore, the calculated energy is not correct.
+		.[observation] The issue was found when checking topsw with sweeped IMC size. I found when IMC size becomes bigger (e.g. 256x256), the nb_layers in cme_list becomes less, which results in higher topsw, because of missing energy for some layers.
+
+#05/08/2023-05/09/2023:
+	.[fix] the bandwidth of dram will be set equaling to nb_columns/core * nb_cores in input files (main_dse_cp.py and main_dse_aimc_cp.py), AND it not will be changed in zigzag. Recover the previous change of calculation for memory_word_acess in cost_model.py from pJ/bit to pJ/access.
+	.[fix] the bandwidth of cache will be set to equal to max(input_bw * nb_cores, output_bw * nb_cores)
+		.[reason] the reason of doing this is to make the bandwidth not to be the bottleneck.
+		.[reason] with previous change of using pJ/bit, the number of word access in final cme_list seems not correct. So I removed it.
+		.[extra note] the bw of cache (SRAM) will be reduced if current bw is so high that cacti cannot generate an available sram.
+			.[observation log] why dram energy will decrease when IMC size increases
+				. found dram access count for weight is not equal to wr_in_from_high count for weight cells in cost_model.py
+				. figuring out how the access count is calculated...
+				. cme_list.accelerator.get_cores(1).__dict__ can check used mem hier
+				. seems the memory_word_access of dram for weight is incorrect, try to remove the previous change of changing mem_access word in terms of bit
+				. the memory_word_access of dram for weight still is incorrect
+				. why dfr.cme.to_numpy()[1][0].accelerator.get_core(1).mem_r_bw_dict has 32b bw of dram for weight, but dfr.cme.to_numpy()[1][0].accelerator.get_core(1).mem_hierarchy_dict['I1'][1].read_bw = 128??
+				. found in CostModelStage.py, dram_bw is changed with an upper limit of 128 under function 'run()'. It has been commented out.

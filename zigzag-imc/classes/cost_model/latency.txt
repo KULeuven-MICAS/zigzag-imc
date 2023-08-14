@@ -1,0 +1,7 @@
+self.allowed_mem_updat_cycle = allowed_mem_updat_cycle
+The number of cycles available for providing/receiving data
+
+self.real_data_trans_cycle = real_data_trans_cycle
+The number of bits that have to be transferred within the transfer window
+
+

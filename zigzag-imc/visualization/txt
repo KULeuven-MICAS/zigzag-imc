@@ -1,0 +1,18 @@
+Hi, it's been a while since the last update on the experiments so just a quick update on the status:
+
+We are comparing 
+
+this AIMC design (single macro), (1152x512x 1 macro), 28nm
+this AIMC+DIMC design (64 x 32 x 8 macros), 28nm
+this DIMC design (dimc) (256 x 256 x 4 macros), 22nm
+this ⁠DIMC design (dimc2) (48 x 4 x 192 macros), 22nm
+
+all of them execute in 4bit operations. I had to increase the CIM memory of all DIMC designs to make them match with the AIMC one (which we assume to be a single, 1152x256 macro). Also, a slight modification w.r.t. to the dimc2 model reported on the paper: the paper reports 8b computation, for this comparison 4bit/4bit is used.
+
+In the plot are represented the energy breakdowns; the star represents the potential peak efficiency that can be achieved by the design but that is not achieved because of underutilization. dimc2 and dimc have the same computational resources but dimc2 has higher granularity (smaller cores) and can thus map better depthwise layers (which are present in both DS-CNN and mobilenet)
+
+Still the weight writing energy for dimc2 with the deepautoencoder workload seems to be a bit off compared to the others; I will re-check it tomorrow.
+
+Also the latency and bandwidth numbers are ready, I will plot them tomorrow morning.
+
+

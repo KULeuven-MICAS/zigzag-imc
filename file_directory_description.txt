@@ -1,0 +1,99 @@
+####### READ ME #######
+Author:   Jiacong Sun
+Email:    jiacong.sun@kuleuven.be
+
+####### CONTENT #######
+1. General description
+2. Abbreviation list
+3. Dataset description
+
+####### 1. GENERAL DESCRIPTION ######
+The directory includes:
+    * code for cost model validation
+    * modified ZigZag framework with IMC (In-Memory Computing) extension
+    * script for generating data in the paper.
+
+####### 2. ABBREVIATION LIST #######
+IMC:    In-Memory Computing
+AIMC:   Analog IMC
+DIMC:   Digital IMC
+CACTI:  The name of an open-source memory cost estimator
+
+####### 3. DATASET DESCRIPTION #######
+Directory tree illustration:
+
+top
+  +-- imc_modeling_after_validation (folder containing scripts for cost model validation, corresponding to Fig. 6 in the paper)
+        +-- README.rd (demonstration on what scripts to run)
+        +-- imc_validation_hw_architectures.svg (hardware structures of all used papers for validation)
+        +-- aimc_validation (scripts for AIMC model validation)
+                +-- 22-28nm
+                    +-- aimc_validation.py (TOP script for AIMC validation)
+                    +-- aimc*_validation_subfunc.py (script for single paper validation)
+                    +-- aimc_cost_model.py (classes for components in AIMC cost model)
+                    +-- dimc_cost_model.py (classes for components in DIMC cost model)
+                [extra note] The only parameters to be extracted in AIMC model is ADC cost. It was done manually. The scripts here can show the mismatch results.
+        +-- dimc_validation
+                +-- 28nm
+                    +-- model_extration_28nm.py (TOP script for DIMC parameter extration)
+                    +-- dimc_validation.py (script to check the mismatch details of the first 3 papers in the TOP script after model validation)
+                    +-- dimc_validation4.py (script to check the mismatch details of paper 4 after model validation)
+                    +-- dimc_validation_subfunc.py (classes definition for hardware of the first 3 papers in the TOP script)
+                    +-- dimc_validation_subfunc4.py (class definition for hardware of the 4th paper in the TOP script)
+                    +-- dimc_cost_model.py (classes for components in DIMC cost model)
+  +
+  +-- zigzag-imc (ZigZag framework with IMC extension, used for experiment part in the paper)
+        +-- peak_eval.py (used to generate pickle data file @ peak performance, output: peak_eval_256kB.pickle. 256kB means cache size for input and output)
+                |-- function: peak_eval(): (used to generate pickle data)
+                |-- function: breakdown_vs_imc_size(): (used to generate cost breakdown plot, corresponding to Fig. 8 in the paper)
+        +-- peak_eval_256kB.pickle (output pickle data file of peak_eval.py: peak_eval())
+        +-- plotlayertype.py (function definition for generating images in the paper)
+                |-- function: test_pkl_file_read.workload_vs_system(en_layer='off',simulation='off', key='imc'): (used to generate Fig. 7 in the paper. Make parameter simulation='on' if peak_eval_256kB.pickle doesn't exist.)
+                |-- function: test_pkl_file_read.workload_vs_system(en_layer='on', key='imc',simulation='off'): (used to generate Fig. 10)
+                |-- function: test_pkl_file_read.plt_multiple_energy_breakdown(key='imc'): (used to generate Fig. 11)
+                |-- function: test_pkl_file_read.plt_multiple_latency_breakdown(key='imc'): (generate latency breakdown of each layer. Not used in the paper)
+                |-- function: test_pkl_file_read.workload_vs_system(en_workload='on'): (used to generate Fig. 12)
+                |-- function: energy_breakdown_across_layers(workload, user_rows=32): (used to display energy breakdown of each layer, not used in the paper)
+                |-- function: plt_latency_breakdown(dfr): (plot latency scaling with imc size for a single layer. For debugging.)
+                |-- function: plt_area_breakdown(dfr): (plot area scaling with imc size for a single layer. For debugging.)
+        +-- test_pkl_file_read.py (simulation script to generate data from ZigZag)
+                |-- function: workload_eval_multi_processing(workloads, mp=True, clr=False): (generate simulation results)
+                    [extra note] the framework has been changed after the paper submission. In original simulation, a memory bandwidth under-utilization will incur an energy cost saming to full bandwidth. To generate the original data, you need to:
+                                    1) remove the definition of 'min_bw' on dram and cache level in generate_zigzag_hardware*.py;
+                                    2) in cost_model.py, the original formula for [rd_out_to_low, rd_out_to_high, wr_in_by_high, wr_out_to_high] is commented (now the memory energy will scale down if under-utilized). Change the formula back before wanting to reget the simulation result.
+                |-- function: workload_output_read(workloads): (read the data of entire workload from the 'outputs' folder)
+                |-- function: plt_multiple_energy_breakdown(key='imc', ax2_enable = 'on'): (generate Fig. 11)
+                |-- function: plt_multiple_latency_breakdown(key='imc'): (generate latency breakdown of each layer. Not used in the paper)
+                |-- function: workload_vs_system(simulation='off', en_layer='off', en_workload='off', key='imc'): (called in plotlayertype.py to generate Fig. 10, 11, 12)
+        +-- main_dsp_cp.py (simulation script for DIMC. Called by test_pkl_file_read.py)
+        +-- main_dsp_aimc_cp.py (simulation script for AIMC. Called by test_pkl_file_read.py)
+        +-- get_imc_cost.py (derive the energy/tclk/area cost of DIMC macro. Called by main_dsp_cp.py)
+        +-- get_aimc_cost.py (derive the energy/tclk/area cost of AIMC macro. Called by main_dsp_aimc_cp.py)
+        +-- get_cacti_cost.py (derive a memory instance cost from CACTI. Called by many scripts)
+        +-- generate_zigzag_hardware.py (generate the ZigZag input file of DIMC hardware definition. Called by main_dsp_cp.py)
+        +-- generate_zigzag_hardware_aimc.py (generate the ZigZag input file of AIMC hardware definition. Called by main_dsp_aimc_cp.py)
+        +-- generate_default_mapping.py (generate the ZigZag mapping file. Called by main_dsp_cp.py and main_dsp_aimc_cp.py)
+        +-- dimc_definition.py (DIMC class definition. Called by get_imc_cost.py)
+        +-- aimc_definition.py (AIMC class definition. Called by get_aimc_cost.py)
+        +-- dimc_basics.py (DIMC elements definition. Called by aimc_definition.py and dimc_definition.py)
+        +-- aimc_basics.py (AIMC elements definition. Called by aimc_definition.py and dimc_definition.py)
+        +-- cacti_config_creator.py (used to assist deriving cost from CACTI. Called by get_cacti_cost.py)
+        +
+        +-- self_gen (folder for input file when using CACTI. Used by peak_eval.py: peak_eval())
+        +-- inputs/tinyml (input files for ZigZag. All generated input files will be put here)
+        +-- outputs
+                +-- aimc_max (output pickle files for AIMC)
+                +-- dimc (output pickle files for DIMC)
+        +-- cacti-master (folder to call CACTI. Used in main_dsp_cp.py and main_dsp_aimc_cp.py)
+        +-- classes (ZigZag classes. Compared to ZigZag public code, the major change is: * hardware/architecture/operational_array.py, operational_unit.py, memory_hierarchy.py)
+        +-- docs (include some docs from original ZigZag repository. Rarely used. A bit mess.)
+        +-- onnx_workload (contain input onnx files. Called by main_dsp_cp.py and main_dsp_aimc_cp.py)
+        +-- venv (folder from original ZigZag repository. Never touched)
+        +-- visualization (folder used by original ZigZag framework. Never touched)
+        +-- workload_preprocessing (converting the workload model from tflite file to onnx files)
+                +-- tensorflow_to_onnx (converting tflite model into onnx model, using csh script in each subfolder)
+                +-- infer_onnx (reshaping the onnx file, to separate the data out and only keep the layer shape. The reason of doing this is to making the input onnx file smaller and ZigZag will process the input file faster)
+        +-- LICENSE (license file)
+        +-- README.md (readme file)
+        +-- requirements.txt (python package requirement)
+        +-- utils.py (some classes definition, which is called in ZigZag)
