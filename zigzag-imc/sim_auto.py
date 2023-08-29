@@ -40,7 +40,7 @@ def workload_eval_multi_processing(workloads, mp=True, clr=False):
             nb_cores = [1]
             act_pres = [8] # operand precision
             input_pres = [1 if imc_type=='dimc' else 2]
-            di = [x for x in range(5, 11)]
+            di = [2**x for x in range(5, 11)]
             cols = di # nb_columns of SRAM cells
             weight_mem = ['dram'] # dram or sram for the top memory of weight
             cache_size = 256 # KB (only used for if condition below!)
@@ -800,6 +800,6 @@ def plt_multiple_energy_breakdown(key='imc', ax2_enable = 'on'):
 
 if __name__ == '__main__':
     workloads = ['ds-cnn', 'ae', 'mobilenet', 'resnet8'] # onnx folder name list
-    workload_eval_multi_processing(workloads, mp=True, clr=False) # zigzag simulation (mp=True: multi-process; False: single-process)
+    workload_eval_multi_processing(workloads, mp=False, clr=False) # zigzag simulation (mp=True: multi-process; False: single-process)
 
 
