@@ -1,9 +1,0 @@
-numpy
-networkx
-sympy
-matplotlib
-onnx
-pandas
-plotly
-tqdm
-termcolor
