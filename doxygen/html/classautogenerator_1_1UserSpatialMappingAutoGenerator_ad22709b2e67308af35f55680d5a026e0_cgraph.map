@@ -1,0 +1,11 @@
+<map id="run" name="run">
+<area shape="rect" id="node1" title=" " alt="" coords="5,115,48,142"/>
+<area shape="rect" id="node2" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a2a2ffdaffbf6ae042b5fa34ac64dd80d" title="Generator that yields user&#45;defined spatial mappings." alt="" coords="122,71,289,112"/>
+<area shape="rect" id="node9" href="$classgenerator_1_1UserSpatialMappingGenerator.html#a2a2ffdaffbf6ae042b5fa34ac64dd80d" title="Generator that yields user&#45;defined spatial mappings." alt="" coords="96,137,315,193"/>
+<area shape="rect" id="node3" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#ab621fe4522a75ecaa5bc176f0b7f0ad7" title="This function will add an OX or OY diagonal unrolling for a given spatial mapping if OX or OY in user..." alt="" coords="386,5,542,47"/>
+<area shape="rect" id="node5" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a26e2ead06314082e293d0a3965628e1c" title=" " alt="" coords="387,71,541,112"/>
+<area shape="rect" id="node8" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a570572d2854da61d13a11ddeb9a01a0e" title=" " alt="" coords="363,136,565,177"/>
+<area shape="rect" id="node4" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a65635f2d09b99d67b9285d22baf95a87" title=" " alt="" coords="667,17,779,43"/>
+<area shape="rect" id="node6" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a6f18cab0d3471d80232f08af77736696" title=" " alt="" coords="678,74,767,101"/>
+<area shape="rect" id="node7" href="$classgenerator_1_1UserSpatialMappingGenerator.html#a6f18cab0d3471d80232f08af77736696" title=" " alt="" coords="613,125,832,167"/>
+</map>

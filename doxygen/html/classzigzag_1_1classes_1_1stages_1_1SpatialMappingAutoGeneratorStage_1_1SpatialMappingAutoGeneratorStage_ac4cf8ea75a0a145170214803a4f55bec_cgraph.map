@@ -1,0 +1,4 @@
+<map id="run" name="run">
+<area shape="rect" id="node1" title="Run this stage by generating user&#45;formatted spatial mappings which are converted to the memory&#45;level ..." alt="" coords="5,13,48,39"/>
+<area shape="rect" id="node2" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage_1_1SpatialMappingAutoGeneratorStage.html#a84c16caf0a5e95d55466aacabba10205" title="Modify memory size of the innermost input mem to support OX, OY unrolling." alt="" coords="96,5,276,47"/>
+</map>

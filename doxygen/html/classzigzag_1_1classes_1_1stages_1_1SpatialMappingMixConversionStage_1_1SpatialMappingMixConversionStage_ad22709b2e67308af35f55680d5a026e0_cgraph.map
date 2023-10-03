@@ -1,0 +1,6 @@
+<map id="run" name="run">
+<area shape="rect" id="node1" title="Runs the runnable." alt="" coords="5,57,48,84"/>
+<area shape="rect" id="node2" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#a9c517d63aca26f581f5c111c92408975" title="Convert the user&#45;defined spatial mapping across operational array dimensions to the internal SpatialM..." alt="" coords="96,5,431,61"/>
+<area shape="rect" id="node3" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html#a9c517d63aca26f581f5c111c92408975" title="Convert the user&#45;defined spatial mapping across operational array dimensions to the internal SpatialM..." alt="" coords="185,86,342,127"/>
+<area shape="rect" id="node4" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html#a9b1d722a8f098d0b00443a92d83b837d" title=" " alt="" coords="479,86,647,127"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="get_dac_cost" name="get_dac_cost">
+<area shape="rect" id="node1" title=" " alt="" coords="524,56,631,83"/>
+<area shape="rect" id="node2" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#aa10a579ff9076a72afe56f183c7a8213" title="get area of AIMC macros (cells, mults, adders, adders_pv, accumulators." alt="" coords="347,5,425,32"/>
+<area shape="rect" id="node5" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#ac941fa5c0b70480a8b9164e1f6f8237b" title="get delay of imc macros (worst path: dacs &#45;&gt; mults &#45;&gt; adcs &#45;&gt; adders &#45;&gt; accumulators)" alt="" coords="343,56,429,83"/>
+<area shape="rect" id="node6" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#a15746008da20f60d631f1dc7b713ed2b" title="macro&#45;level one&#45;cycle energy of imc arrays (fully utilization, no weight updating) (components: cells..." alt="" coords="296,107,476,149"/>
+<area shape="rect" id="node3" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#a04279f840c374a0a5c3d6b12a81d3452" title="macro&#45;level peak performance of imc arrays (fully utilization, no weight updating)" alt="" coords="42,21,211,62"/>
+<area shape="rect" id="node4" href="$classDimcArrayUnit_1_1DimcArrayUnit.html#a04279f840c374a0a5c3d6b12a81d3452" title=" " alt="" coords="5,86,248,127"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="get_macro_level_peak_performance" name="get_macro_level_peak_performance">
+<area shape="rect" id="node1" title="macro&#45;level peak performance of imc arrays (fully utilization, no weight updating)" alt="" coords="5,141,175,182"/>
+<area shape="rect" id="node2" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#aa10a579ff9076a72afe56f183c7a8213" title="get area of AIMC macros (cells, mults, adders, adders_pv, accumulators." alt="" coords="323,123,401,149"/>
+<area shape="rect" id="node6" href="$classDimcArrayUnit_1_1DimcArrayUnit.html#aa10a579ff9076a72afe56f183c7a8213" title="area of imc macros (cells, mults, adders, adders_pv, accumulators." alt="" coords="223,173,501,200"/>
+<area shape="rect" id="node7" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#ac941fa5c0b70480a8b9164e1f6f8237b" title="get delay of imc macros (worst path: dacs &#45;&gt; mults &#45;&gt; adcs &#45;&gt; adders &#45;&gt; accumulators)" alt="" coords="319,5,405,32"/>
+<area shape="rect" id="node8" href="$classDimcArrayUnit_1_1DimcArrayUnit.html#ac941fa5c0b70480a8b9164e1f6f8237b" title=" " alt="" coords="241,225,483,266"/>
+<area shape="rect" id="node9" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#a15746008da20f60d631f1dc7b713ed2b" title="macro&#45;level one&#45;cycle energy of imc arrays (fully utilization, no weight updating) (components: cells..." alt="" coords="272,57,452,98"/>
+<area shape="rect" id="node10" href="$classDimcArrayUnit_1_1DimcArrayUnit.html#a15746008da20f60d631f1dc7b713ed2b" title=" " alt="" coords="241,290,483,331"/>
+<area shape="rect" id="node3" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#ab9b08098b91c90468bf35e05e1c983e1" title=" " alt="" coords="583,76,689,103"/>
+<area shape="rect" id="node4" href="$classAimcArrayUnit_1_1AimcArrayUnit.html#a1f5ce72ed2f3a6e36741f66f8f7dfb9d" title=" " alt="" coords="583,25,689,52"/>
+<area shape="rect" id="node5" href="$classimc__unit_1_1ImcUnit.html#aa273d543e964af7d14211f61d8ad36a0" title=" " alt="" coords="549,137,723,193"/>
+</map>
