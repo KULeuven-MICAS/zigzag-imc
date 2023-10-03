@@ -20,7 +20,7 @@ The repository includes three examples provided in the `run.sh` script, which ar
 - an example for an SRAM-based Digital In-Memory Computing hardware template.
 - an example for an SRAM-based Analog In-Memory Computing hardware template.
 
-
+The output will be saved under `outputs/` folder.
 
 ## New features
 In this novel version, in addition to the features found in the basic zigzag, we have introduced several new capabilities:
