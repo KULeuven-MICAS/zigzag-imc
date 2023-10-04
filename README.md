@@ -33,7 +33,7 @@ In this novel version, in addition to the features found in the basic zigzag, we
 
 *: features are planned to be integrated into the base ZigZag framework.
 
-## In-Memory Computing Model Description
+## In-Memory Computing Hardware Cost Model Description
 Our SRAM-based In-Memory Computing model is a versatile, parameterized model designed to cater to both Analog IMC and Digital IMC.
 Since hardware costs are technology-node dependent, we have performed special calibration for the 28nm technology node. The model has been validated against 7 chips from the literature. 
 A summary of the hardware settings for these chips is provided in the following table.
