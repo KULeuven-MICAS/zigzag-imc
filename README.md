@@ -55,7 +55,7 @@ The validation results are displayed in the figure below (assuming 50% input tog
 The gray bar represents the reported performance value, while the colored bar represents the model estimation.
 
 <p align="center">
-<img src="https://github.com/KULeuven-MICAS/zigzag-imc/tree/master/imc_modeling_after_validation/model_validation.png" width="80%" alt="imc model validation plot">
+<img src="https://github.com/KULeuven-MICAS/zigzag-imc/blob/master/imc_modeling_after_validation/model_validation.png" width="80%" alt="imc model validation plot">
 </p>
 
 - AIMC1 incurs additional area costs due to repeaters/decaps.
