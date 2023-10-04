@@ -167,7 +167,7 @@ def memory_hierarchy_dut(imc_array):
         visualize_memory_hierarchy_graph,
     )
 
-    # visualize_memory_hierarchy_graph(memory_hierarchy_graph)
+    visualize_memory_hierarchy_graph(memory_hierarchy_graph)
     return memory_hierarchy_graph
 
 

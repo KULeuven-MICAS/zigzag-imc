@@ -1,3 +1,5 @@
+**This folder is where we did cost model validation for AIMC and DIMC.**
+
 AIMC:
 To get mismatch value and cost breakdown for AIMC under 28nm, run "python aimc_validation.py" under aimc_validation/22-28nm/.
 

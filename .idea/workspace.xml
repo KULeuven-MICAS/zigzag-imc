@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/imc_modeling_after_validation/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/imc_modeling_after_validation/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Aimc.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Aimc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Dimc.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Dimc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/TPU_like.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/TPU_like.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
