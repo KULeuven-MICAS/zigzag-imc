@@ -449,6 +449,7 @@ def get_cacti_cost(cacti_path, tech_node, mem_type, mem_size_in_byte, bw, hd_has
         mem_size_in_byte_adjust = mem_size_in_byte
 
     file_path = './self_gen' # location for input file (cache.cfg) and output file (cache.cfg.out)
+    os.makedirs(file_path, exist_ok=True)
 
     # clear target folder
     # if system == 'Linux':
