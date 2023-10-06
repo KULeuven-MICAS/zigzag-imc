@@ -150,3 +150,6 @@ docs/make.bat
 
 # documentation output
 html/
+
+# cacti cache files
+zigzag/classes/cacti/cacti_master/self_gen/
