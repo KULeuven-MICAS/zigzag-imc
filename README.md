@@ -22,6 +22,8 @@ The repository includes three examples provided in the `run.sh` script, which ar
 
 The output will be saved under `outputs/` folder.
 
+**Note**: Since CACTI is not supported on Windows, please run these example on Linuxs, or else user-defined memory cost value should be provided in the input hardware file.
+
 ## New features
 In this novel version, in addition to the features found in the basic zigzag, we have introduced several new capabilities:
 - **New cost models**: Added support for SRAM-based Analog In-Memory Computing and Digital In-Memory Computing (28nm).
