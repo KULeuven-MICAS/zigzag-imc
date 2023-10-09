@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/imc_modeling_after_validation/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/imc_modeling_after_validation/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +28,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/base-zigzag/zigzag"
+    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/zigzag-imc"
   }
 }]]></component>
   <component name="RunManager" selected="Python.main">
