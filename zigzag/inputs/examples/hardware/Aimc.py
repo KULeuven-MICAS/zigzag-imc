@@ -9,7 +9,7 @@ from zigzag.classes.hardware.architecture.ImcArray import ImcArray
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_w_cost_per_weight_from_cacti
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_cacti_cost
 
-def memory_hierarchy_dut(imc_array):
+def memory_hierarchy_dut(imc_array, visualize=False):
     """ [OPTIONAL] Get w_cost of imc cell group from CACTI if required """
     cacti_path = "zigzag/classes/cacti/cacti_master"
     tech_param = imc_array.unit.logic_unit.tech_param
@@ -163,11 +163,12 @@ def memory_hierarchy_dut(imc_array):
         served_dimensions="all",
     )
 
-    from zigzag.visualization.graph.memory_hierarchy import (
-        visualize_memory_hierarchy_graph,
-    )
+    if visualize:
+        from zigzag.visualization.graph.memory_hierarchy import (
+            visualize_memory_hierarchy_graph,
+        )
 
-    visualize_memory_hierarchy_graph(memory_hierarchy_graph)
+        visualize_memory_hierarchy_graph(memory_hierarchy_graph)
     return memory_hierarchy_graph
 
 
@@ -192,7 +193,7 @@ def imc_array_dut():
         "input_precision":      8,      # activation precision
         "weight_precision":     8,      # weight precision
         "input_bit_per_cycle":  2,      # nb_bits of input/cycle (treated as DAC resolution)
-        "group_depth":          1,      # m factor
+        "group_depth":          1031,      # m factor
         "adc_resolution":       8,      # ADC resolution
         "wordline_dimension":   "D1",   # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension":    "D2",   # hardware dimension where bitline is (corresponds to the served dimension of output regs)
@@ -205,7 +206,7 @@ def imc_array_dut():
     dimensions = {
         "D1": 4,    # wordline dimension
         "D2": 32,   # bitline dimension
-        "D3": 1,    # nb_macros (nb_arrays)
+        "D3": 19,    # nb_macros (nb_arrays)
     }  # {"D1": ("K", 4), "D2": ("C", 32),}
     hd_param["adc_resolution"] = hd_param["input_bit_per_cycle"] + 0.5 * int(math.log2(dimensions["D2"]))
 

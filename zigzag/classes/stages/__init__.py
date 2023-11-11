@@ -1,7 +1,7 @@
 from .CostModelStage import CostModelStage
 from .DumpStage import DumpStage
-from .SearchNoUseMemStage import SearchNoUseMemStage
-from .RemoveNoUseMemStage import RemoveNoUseMemStage
+from .SearchUnusedMemoryStage import SearchUnusedMemoryStage
+from .RemoveUnusedMemoryStage import RemoveUnusedMemoryStage
 from .PEArrayScalingStage import PEArrayScalingStage
 from .PlotTemporalMappingsStage import PlotTemporalMappingsStage
 from .SaveStage import CompleteSaveStage, SimpleSaveStage, PickleSaveStage
@@ -26,7 +26,6 @@ from .RunOptStages import (
 from .SpatialMappingConversionStage import SpatialMappingConversionStage
 from .SpatialMappingMixConversionStage import SpatialMappingMixConversionStage
 from .SpatialMappingGeneratorStage import SpatialMappingGeneratorStage
-from .SpatialMappingAutoGeneratorStage import SpatialMappingAutoGeneratorStage
 from .Stage import Stage, MainStage
 from .TemporalOrderingConversionStage import TemporalOrderingConversionStage
 from .WorkloadStage import WorkloadStage

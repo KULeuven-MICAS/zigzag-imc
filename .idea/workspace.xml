@@ -5,9 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imc_model_validation/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/imc_model_validation/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_onnx.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_onnx.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/cost_model/cost_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/cost_model/cost_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/cost_model/cost_model_in_sram_computing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/conv.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/conv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/default.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/default.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/gemm.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/gemm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/matmul.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/matmul.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/io/onnx/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/io/onnx/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/opt/spatial/autogenerator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/opt/spatial/generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/opt/spatial/generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/CostModelStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/CostModelStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/RemoveNoUseMemStage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SaveStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SaveStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SearchNoUseMemStage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingAutoGeneratorStage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingGeneratorStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingGeneratorStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/WorkloadStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/WorkloadStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/workload/layer_node.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/workload/layer_node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Aimc.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Aimc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Dimc.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/inputs/examples/hardware/Dimc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,14 +49,56 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/zigzag-imc"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/users/micas/jsun/sunjc/codes/branch_for_updating_zigzag_imc/zigzag-imc_fork&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Python.main">
+}</component>
+  <component name="RunManager" selected="Python.debug">
+    <configuration name="api" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="zigzag-imc_fork" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/zigzag" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/zigzag/api.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="debug" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="zigzag-imc_fork" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/debug.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="zigzag-imc" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -77,6 +143,8 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.debug" />
+        <item itemvalue="Python.api" />
         <item itemvalue="Python.main_onnx" />
       </list>
     </recent_temporary>
@@ -91,16 +159,5 @@
       <updated>1696348058948</updated>
     </task>
     <servers />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/zigzag/classes/stages/SearchNoUseMemStage.py</url>
-          <line>67</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
