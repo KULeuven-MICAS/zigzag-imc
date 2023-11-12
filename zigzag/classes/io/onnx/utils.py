@@ -25,13 +25,17 @@ def parse_mapping_from_path(mapping_path):
             raise ValueError(
                 "No mapping path/dict provided, and default was not found."
             )
-    breakpoint()
-    if "/" in mapping_path and mapping_path.split(".")[-1] in ["pickle","pkl","mapping",]:
+    if "/" in mapping_path and mapping_path.split(".")[-1] in [
+        "pickle",
+        "pkl",
+        "mapping",
+    ]:
         # Load in the pickle mapping file
         with open(mapping_path, "rb") as fp:
             mapping = pickle.load(fp)
     else:
         global module
+        # breakpoint()
         module = importlib.import_module(mapping_path)
         mapping = module.mapping
     if "default" in mapping:

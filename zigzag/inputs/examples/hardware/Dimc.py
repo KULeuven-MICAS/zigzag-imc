@@ -192,7 +192,7 @@ def imc_array_dut():
         "input_precision":      8,          # activation precision expected in the hardware
         "weight_precision":     8,          # weight precision expected in the hardware
         "input_bit_per_cycle":  1,          # nb_bits of input/cycle/PE
-        "group_depth":          511,          # group depth in each PE
+        "group_depth":          1,          # group depth in each PE
         "wordline_dimension": "D1",         # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension": "D2",          # hardware dimension where bitline is (corresponds to the served dimension of output regs)
         "enable_cacti":         True,       # use CACTI to estimated cell array area cost (cell array exclude build-in logic part)
@@ -203,7 +203,7 @@ def imc_array_dut():
     dimensions = {
         "D1": 4,    # wordline dimension
         "D2": 32,   # bitline dimension
-        "D3": 13,    # nb_macros (nb_arrays)
+        "D3": 1,    # nb_macros (nb_arrays)
     }  # e.g. {"D1": ("K", 4), "D2": ("C", 32),}
 
     imc_array = ImcArray(
