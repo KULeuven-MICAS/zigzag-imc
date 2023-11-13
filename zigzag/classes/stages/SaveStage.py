@@ -135,24 +135,7 @@ class PickleSaveStage(Stage):
     def run(self) -> Generator[Tuple[CostModelEvaluation, Any], None, None]:
         substage = self.list_of_callables[0](self.list_of_callables[1:], **self.kwargs)
         for id, (cme, extra_info) in enumerate(substage.run()):
-
-            # TODO: [jiacong] [MODIFY] avoid error if there is only one cme in extra_info
-            if isinstance(extra_info[0], tuple):
-                all_cmes = [cme for (cme, extra) in extra_info]
-            else:
-                (cme, extra) = extra_info # there is only one tuple inside extra_info
-                all_cmes = [cme]
-            # TODO: [jiacong] [FINISH]
-            # TODO: [jiacong] [ADD] modify output filename
-            if type(cme) == list:
-                self.pickle_filename = self.pickle_filename.replace(
-                    "?", "overall"
-                )
-            else:
-                self.pickle_filename = self.pickle_filename.replace(
-                    "?", f"{cme}"
-                )
-
+            all_cmes = [cme for (cme, extra) in extra_info]
             yield cme, extra_info
         # After we have received all the CMEs, save them to the specified output location.
         dirname = os.path.dirname(self.pickle_filename)

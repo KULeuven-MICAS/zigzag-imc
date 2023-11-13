@@ -31,11 +31,11 @@ mainstage = MainStage([  # Initializes the MainStage as entry point
     AcceleratorParserStage,  # Parses the accelerator
     # PickleSaveStage, # Save CMEs to a pickle file
     CompleteSaveStage,  # Saves all received CMEs information to a json
-    SearchNoUseMemStage, # Detect unnecessary memory instances
+    SearchUnusedMemoryStage, # Detect unnecessary memory instances
     WorkloadStage,  # Iterates through the different layers in the workload
-    RemoveNoUseMemStage, # Remove unnecessary memory instances
+    RemoveUnusedMemoryStage, # Remove unnecessary memory instances
     MinimalEDPStage, # Reduces all CMEs, returning minimal EDP one
-    SpatialMappingAutoGeneratorStage,  # Generates multiple spatial mappings (SM)
+    SpatialMappingGeneratorStage,  # Generates multiple spatial mappings (SM)
     LomaStage,  # Generates multiple temporal mappings (TM)
     CostModelStage  # Evaluates generated SM and TM through cost model
 ],
@@ -46,9 +46,9 @@ mainstage = MainStage([  # Initializes the MainStage as entry point
     pickle_filename=f"outputs/{experiment_id}-layer_?.pkl",  # output file save pattern
     loma_lpf_limit=6,  # required by LomaStage
     loma_show_progress_bar=True,  # shows a progress bar while iterating over temporal mappings
-    enable_mix_sm=True,  # True: enable generating mix spatial mapping. False: single layer dim mapping during the autogeneration
-    enable_speedup=False,  # True: only keep 3 sm with the highest hardware utilization to speedup simulation time
-    enable_ox_unroll=True,  # True: enable OX/OY unrolling when automatically generating sm
+    enable_mix_spatial_mapping_generation=True,  # True: enable generating mix spatial mapping. False: single layer dim mapping during the autogeneration
+    maximize_hardware_utilization=False,  # True: only keep 2 sm with the highest hardware utilization to speedup simulation time
+    enable_weight_diagonal_mapping=True,  # True: enable OX/OY unrolling when automatically generating sm
 )
 
 # Launch the MainStage

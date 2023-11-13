@@ -22,6 +22,8 @@ The repository includes three examples provided in the `run.sh` script, which ar
 
 The output will be saved under `outputs/` folder.
 
+API is also created in zigzag/api.py, which can be directly called externally.
+
 **Note**: Since CACTI is not supported on Windows, please run these example on Linuxs, or else user-defined memory cost value should be provided in the input hardware file.
 
 ## New features

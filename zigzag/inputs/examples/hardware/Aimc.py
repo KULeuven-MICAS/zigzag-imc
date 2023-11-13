@@ -9,7 +9,7 @@ from zigzag.classes.hardware.architecture.ImcArray import ImcArray
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_w_cost_per_weight_from_cacti
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_cacti_cost
 
-def memory_hierarchy_dut(imc_array):
+def memory_hierarchy_dut(imc_array, visualize=False):
     """ [OPTIONAL] Get w_cost of imc cell group from CACTI if required """
     cacti_path = "zigzag/classes/cacti/cacti_master"
     tech_param = imc_array.unit.logic_unit.tech_param
@@ -163,11 +163,12 @@ def memory_hierarchy_dut(imc_array):
         served_dimensions="all",
     )
 
-    from zigzag.visualization.graph.memory_hierarchy import (
-        visualize_memory_hierarchy_graph,
-    )
+    if visualize:
+        from zigzag.visualization.graph.memory_hierarchy import (
+            visualize_memory_hierarchy_graph,
+        )
 
-    visualize_memory_hierarchy_graph(memory_hierarchy_graph)
+        visualize_memory_hierarchy_graph(memory_hierarchy_graph)
     return memory_hierarchy_graph
 
 
