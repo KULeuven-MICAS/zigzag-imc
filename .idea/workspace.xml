@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SearchUnusedMemoryStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SearchUnusedMemoryStage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +27,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/branch_for_updating_zigzag_imc/zigzag-imc_fork"
+    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/tmp/zigzag"
   }
 }]]></component>
   <component name="RunManager" selected="Python.debug">
