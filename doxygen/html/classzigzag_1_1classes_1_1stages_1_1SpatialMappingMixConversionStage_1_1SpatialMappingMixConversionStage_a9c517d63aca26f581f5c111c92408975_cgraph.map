@@ -1,7 +1,7 @@
 <map id="convert_user_spatial_mapping" name="convert_user_spatial_mapping">
 <area shape="rect" id="node1" title="Convert the user&#45;defined spatial mapping across operational array dimensions to the internal SpatialM..." alt="" coords="5,45,163,87"/>
 <area shape="rect" id="node2" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html#a9b1d722a8f098d0b00443a92d83b837d" title=" " alt="" coords="273,5,441,47"/>
-<area shape="rect" id="node3" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#ad6f7ffc655c33b0deddf383a5483814d" title=" " alt="" coords="211,71,504,141"/>
+<area shape="rect" id="node3" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#a995bec3a4499ebb39cbb78c4390d6c03" title=" " alt="" coords="211,71,504,141"/>
 <area shape="rect" id="node4" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#ab398ae0d09f2b7397c72ee0c4e540abd" title=" " alt="" coords="561,23,854,93"/>
 <area shape="rect" id="node8" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#a0160b7000a8a73d9c4dbdb0ca697d00c" title=" " alt="" coords="552,117,863,188"/>
 <area shape="rect" id="node5" href="$classgenerator_1_1UserSpatialMappingGenerator.html#a07ed2ac3c42cb6d687841977023e9542" title=" " alt="" coords="948,8,1167,49"/>
