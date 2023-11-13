@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="" />
+    <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SearchUnusedMemoryStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SearchUnusedMemoryStage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" beforeDir="false" afterPath="$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,7 +29,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/branch_for_updating_base_zigzag/base_zigzag_fork"
+    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/branch_for_updating_zigzag_imc/zigzag-imc_fork"
   }
 }]]></component>
   <component name="RunManager" selected="Python.debug">
@@ -105,7 +109,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_onnx.py" />
-      <option name="PARAMETERS" value="--model zigzag/inputs/examples/workload/mlperf_tiny/ds_cnn.onnx --accelerator zigzag.inputs.examples.hardware.Dimc --mapping zigzag.inputs.examples.mapping.default_imc" />
+      <option name="PARAMETERS" value="--model zigzag/inputs/examples/workload/mlperf_tiny/resnet8.onnx --accelerator zigzag.inputs.examples.hardware.Dimc --mapping zigzag.inputs.examples.mapping.default_imc" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -136,9 +140,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/zigzag/classes/opt/spatial/generator.py</url>
-          <line>222</line>
-          <option name="timeStamp" value="47" />
+          <url>file://$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py</url>
+          <line>227</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/zigzag/classes/stages/SpatialMappingConversionStage.py</url>
+          <line>236</line>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/zigzag/classes/opt/temporal/loma/engine.py</url>
+          <line>103</line>
+          <option name="timeStamp" value="64" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
