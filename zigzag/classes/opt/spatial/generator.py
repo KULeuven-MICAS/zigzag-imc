@@ -141,16 +141,20 @@ class UserSpatialMappingGenerator:
                     for sub_loop in ori_loop:
                         sub_loop_dim = sub_loop[0]
                         sub_loop_size = sub_loop[1]
-                        if sub_loop_size > self.layer.loop_dim_size[sub_loop_dim]:
-                            sub_loop_size = self.layer.loop_dim_size[sub_loop_dim]
-                        loop_to_reform.append((sub_loop_dim, sub_loop_size))
+                        if sub_loop_dim in self.layer.loop_dim_size.keys():
+                            if sub_loop_size > self.layer.loop_dim_size[sub_loop_dim]:
+                                sub_loop_size = self.layer.loop_dim_size[sub_loop_dim]
+                            loop_to_reform.append((sub_loop_dim, sub_loop_size))
                 else:  # single layer sm loop
                     loop_dim = ori_loop[0]
                     loop_size = ori_loop[1]
-                    if loop_size > self.layer.loop_dim_size[loop_dim]:
-                        loop_size = self.layer.loop_dim_size[loop_dim]
-                    loop_to_reform.append((loop_dim, loop_size))
+                    if loop_dim in self.layer.loop_dim_size.keys():
+                        if loop_size > self.layer.loop_dim_size[loop_dim]:
+                            loop_size = self.layer.loop_dim_size[loop_dim]
+                        loop_to_reform.append((loop_dim, loop_size))
                 loop_to_reform = tuple(loop_to_reform)
+                if len(loop_to_reform) == 0:
+                    loop_to_reform = None
                 oa_dim_unrollings = [loop_to_reform]
             else:
                 oa_dim_unrollings = []
