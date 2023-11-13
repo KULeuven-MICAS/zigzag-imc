@@ -1,9 +1,0 @@
-<map id="generate_user_spatial_mappings" name="generate_user_spatial_mappings">
-<area shape="rect" id="node1" title="Generator that yields user&#45;defined spatial mappings." alt="" coords="5,71,172,112"/>
-<area shape="rect" id="node2" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#ab621fe4522a75ecaa5bc176f0b7f0ad7" title="This function will add an OX or OY diagonal unrolling for a given spatial mapping if OX or OY in user..." alt="" coords="243,5,399,47"/>
-<area shape="rect" id="node4" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a26e2ead06314082e293d0a3965628e1c" title=" " alt="" coords="245,71,398,112"/>
-<area shape="rect" id="node7" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a570572d2854da61d13a11ddeb9a01a0e" title=" " alt="" coords="220,136,423,177"/>
-<area shape="rect" id="node3" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a65635f2d09b99d67b9285d22baf95a87" title=" " alt="" coords="524,17,636,43"/>
-<area shape="rect" id="node5" href="$classautogenerator_1_1UserSpatialMappingAutoGenerator.html#a6f18cab0d3471d80232f08af77736696" title=" " alt="" coords="535,74,625,101"/>
-<area shape="rect" id="node6" href="$classgenerator_1_1UserSpatialMappingGenerator.html#a6f18cab0d3471d80232f08af77736696" title=" " alt="" coords="471,125,689,167"/>
-</map>

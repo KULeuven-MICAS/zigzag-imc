@@ -9,7 +9,7 @@ var hierarchy =
     [ "CactiParser", "classcacti__parser_1_1CactiParser.html", null ],
     [ "Core", "classcore_1_1Core.html", null ],
     [ "CostModelEvaluation", "classcost__model_1_1CostModelEvaluation.html", null ],
-    [ "CostModelEvaluationForIMC", "classcost__model__in__sram__computing_1_1CostModelEvaluationForIMC.html", null ],
+    [ "CostModelEvaluationForIMC", "classcost__model__for__sram__imc_1_1CostModelEvaluationForIMC.html", null ],
     [ "DataMovePattern", "classcombined__mapping_1_1DataMovePattern.html", null ],
     [ "Dimension", "classdimension_1_1Dimension.html", null ],
     [ "DummyNode", "classdummy__node_1_1DummyNode.html", null ],
@@ -70,7 +70,7 @@ var hierarchy =
       [ "MinimalEnergyStage", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1MinimalEnergyStage.html", null ],
       [ "MinimalLatencyStage", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1MinimalLatencyStage.html", null ],
       [ "SumStage", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1SumStage.html", null ],
-      [ "RemoveNoUseMemStage", "classzigzag_1_1classes_1_1stages_1_1RemoveNoUseMemStage_1_1RemoveNoUseMemStage.html", null ],
+      [ "RemoveUnusedMemoryStage", "classzigzag_1_1classes_1_1stages_1_1RemoveUnusedMemoryStage_1_1RemoveUnusedMemoryStage.html", null ],
       [ "CacheBeforeYieldStage", "classzigzag_1_1classes_1_1stages_1_1RunOptStages_1_1CacheBeforeYieldStage.html", null ],
       [ "MultiProcessingGatherStage", "classzigzag_1_1classes_1_1stages_1_1RunOptStages_1_1MultiProcessingGatherStage.html", null ],
       [ "MultiProcessingSpawnStage", "classzigzag_1_1classes_1_1stages_1_1RunOptStages_1_1MultiProcessingSpawnStage.html", null ],
@@ -80,8 +80,7 @@ var hierarchy =
       [ "CompleteSaveStage", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1CompleteSaveStage.html", null ],
       [ "PickleSaveStage", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1PickleSaveStage.html", null ],
       [ "SimpleSaveStage", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1SimpleSaveStage.html", null ],
-      [ "SearchNoUseMemStage", "classzigzag_1_1classes_1_1stages_1_1SearchNoUseMemStage_1_1SearchNoUseMemStage.html", null ],
-      [ "SpatialMappingAutoGeneratorStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage_1_1SpatialMappingAutoGeneratorStage.html", null ],
+      [ "SearchUnusedMemoryStage", "classzigzag_1_1classes_1_1stages_1_1SearchUnusedMemoryStage_1_1SearchUnusedMemoryStage.html", null ],
       [ "SpatialMappingConversionStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html", null ],
       [ "SpatialMappingGeneratorStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingGeneratorStage_1_1SpatialMappingGeneratorStage.html", null ],
       [ "SpatialMappingMixConversionStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html", null ],
@@ -92,7 +91,6 @@ var hierarchy =
     [ "TestCase", null, [
       [ "TestLayerNode", "classtest__layer__node_1_1TestLayerNode.html", null ]
     ] ],
-    [ "UserSpatialMappingAutoGenerator", "classautogenerator_1_1UserSpatialMappingAutoGenerator.html", null ],
     [ "UserSpatialMappingGenerator", "classgenerator_1_1UserSpatialMappingGenerator.html", null ],
     [ "ABCMeta", null, [
       [ "Loop", "classloop_1_1Loop.html", null ],

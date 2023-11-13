@@ -11,9 +11,6 @@ var annotated_dup =
     [ "AimcArrayUnit", "namespaceAimcArrayUnit.html", [
       [ "AimcArrayUnit", "classAimcArrayUnit_1_1AimcArrayUnit.html", "classAimcArrayUnit_1_1AimcArrayUnit" ]
     ] ],
-    [ "autogenerator", "namespaceautogenerator.html", [
-      [ "UserSpatialMappingAutoGenerator", "classautogenerator_1_1UserSpatialMappingAutoGenerator.html", "classautogenerator_1_1UserSpatialMappingAutoGenerator" ]
-    ] ],
     [ "cacti_parser", "namespacecacti__parser.html", [
       [ "CactiParser", "classcacti__parser_1_1CactiParser.html", "classcacti__parser_1_1CactiParser" ]
     ] ],
@@ -33,8 +30,8 @@ var annotated_dup =
       [ "PortBeginOrEndActivity", "classcost__model_1_1PortBeginOrEndActivity.html", "classcost__model_1_1PortBeginOrEndActivity" ],
       [ "CostModelEvaluation", "classcost__model_1_1CostModelEvaluation.html", "classcost__model_1_1CostModelEvaluation" ]
     ] ],
-    [ "cost_model_in_sram_computing", "namespacecost__model__in__sram__computing.html", [
-      [ "CostModelEvaluationForIMC", "classcost__model__in__sram__computing_1_1CostModelEvaluationForIMC.html", "classcost__model__in__sram__computing_1_1CostModelEvaluationForIMC" ]
+    [ "cost_model_for_sram_imc", "namespacecost__model__for__sram__imc.html", [
+      [ "CostModelEvaluationForIMC", "classcost__model__for__sram__imc_1_1CostModelEvaluationForIMC.html", "classcost__model__for__sram__imc_1_1CostModelEvaluationForIMC" ]
     ] ],
     [ "default", "namespacedefault.html", [
       [ "DefaultNodeParser", "classdefault_1_1DefaultNodeParser.html", "classdefault_1_1DefaultNodeParser" ]
@@ -174,8 +171,8 @@ var annotated_dup =
             [ "SumStage", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1SumStage.html", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1SumStage" ],
             [ "ListifyStage", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1ListifyStage.html", "classzigzag_1_1classes_1_1stages_1_1ReduceStages_1_1ListifyStage" ]
           ] ],
-          [ "RemoveNoUseMemStage", "namespacezigzag_1_1classes_1_1stages_1_1RemoveNoUseMemStage.html", [
-            [ "RemoveNoUseMemStage", "classzigzag_1_1classes_1_1stages_1_1RemoveNoUseMemStage_1_1RemoveNoUseMemStage.html", "classzigzag_1_1classes_1_1stages_1_1RemoveNoUseMemStage_1_1RemoveNoUseMemStage" ]
+          [ "RemoveUnusedMemoryStage", "namespacezigzag_1_1classes_1_1stages_1_1RemoveUnusedMemoryStage.html", [
+            [ "RemoveUnusedMemoryStage", "classzigzag_1_1classes_1_1stages_1_1RemoveUnusedMemoryStage_1_1RemoveUnusedMemoryStage.html", "classzigzag_1_1classes_1_1stages_1_1RemoveUnusedMemoryStage_1_1RemoveUnusedMemoryStage" ]
           ] ],
           [ "RunOptStages", "namespacezigzag_1_1classes_1_1stages_1_1RunOptStages.html", [
             [ "RemoveExtraInfoStage", "classzigzag_1_1classes_1_1stages_1_1RunOptStages_1_1RemoveExtraInfoStage.html", "classzigzag_1_1classes_1_1stages_1_1RunOptStages_1_1RemoveExtraInfoStage" ],
@@ -192,11 +189,8 @@ var annotated_dup =
             [ "SimpleSaveStage", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1SimpleSaveStage.html", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1SimpleSaveStage" ],
             [ "PickleSaveStage", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1PickleSaveStage.html", "classzigzag_1_1classes_1_1stages_1_1SaveStage_1_1PickleSaveStage" ]
           ] ],
-          [ "SearchNoUseMemStage", "namespacezigzag_1_1classes_1_1stages_1_1SearchNoUseMemStage.html", [
-            [ "SearchNoUseMemStage", "classzigzag_1_1classes_1_1stages_1_1SearchNoUseMemStage_1_1SearchNoUseMemStage.html", "classzigzag_1_1classes_1_1stages_1_1SearchNoUseMemStage_1_1SearchNoUseMemStage" ]
-          ] ],
-          [ "SpatialMappingAutoGeneratorStage", "namespacezigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage.html", [
-            [ "SpatialMappingAutoGeneratorStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage_1_1SpatialMappingAutoGeneratorStage.html", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage_1_1SpatialMappingAutoGeneratorStage" ]
+          [ "SearchUnusedMemoryStage", "namespacezigzag_1_1classes_1_1stages_1_1SearchUnusedMemoryStage.html", [
+            [ "SearchUnusedMemoryStage", "classzigzag_1_1classes_1_1stages_1_1SearchUnusedMemoryStage_1_1SearchUnusedMemoryStage.html", "classzigzag_1_1classes_1_1stages_1_1SearchUnusedMemoryStage_1_1SearchUnusedMemoryStage" ]
           ] ],
           [ "SpatialMappingConversionStage", "namespacezigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage.html", [
             [ "SpatialMappingConversionStage", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html", "classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage" ]

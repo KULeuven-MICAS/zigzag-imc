@@ -1,8 +1,7 @@
 <map id="__init__" name="__init__">
-<area shape="rect" id="node1" title="The class constructor Initialize the accelerator and layer attributes." alt="" coords="5,180,76,207"/>
-<area shape="rect" id="node2" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingAutoGeneratorStage_1_1SpatialMappingAutoGeneratorStage.html#aabad3f669570aa74fd9fef354b6f7074" title=" " alt="" coords="125,5,417,61"/>
-<area shape="rect" id="node3" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="124,85,417,141"/>
-<area shape="rect" id="node4" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingGeneratorStage_1_1SpatialMappingGeneratorStage.html#aabad3f669570aa74fd9fef354b6f7074" title=" " alt="" coords="128,165,413,221"/>
-<area shape="rect" id="node5" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="221,245,321,272"/>
-<area shape="rect" id="node6" href="$classzigzag_1_1classes_1_1stages_1_1TemporalOrderingConversionStage_1_1TemporalOrderingConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="135,296,406,352"/>
+<area shape="rect" id="node1" title="The class constructor Initialize the accelerator and layer attributes." alt="" coords="5,133,76,160"/>
+<area shape="rect" id="node2" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingConversionStage_1_1SpatialMappingConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="124,5,417,61"/>
+<area shape="rect" id="node3" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingGeneratorStage_1_1SpatialMappingGeneratorStage.html#aabad3f669570aa74fd9fef354b6f7074" title=" " alt="" coords="128,85,413,141"/>
+<area shape="rect" id="node4" href="$classzigzag_1_1classes_1_1stages_1_1SpatialMappingMixConversionStage_1_1SpatialMappingMixConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="221,165,321,192"/>
+<area shape="rect" id="node5" href="$classzigzag_1_1classes_1_1stages_1_1TemporalOrderingConversionStage_1_1TemporalOrderingConversionStage.html#aabad3f669570aa74fd9fef354b6f7074" title="Check the layer attribute of the main_inputs:" alt="" coords="135,216,406,272"/>
 </map>
