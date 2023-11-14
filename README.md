@@ -10,7 +10,7 @@ To get started, you can install all packages directly through pip using the pip-
 `$ pip install -r requirements.txt`
 
 ## Getting Started
-The main script is main_onnx.py, which takes into 3 input files:
+The main script is `main_onnx.py`, which takes into 3 input files:
 - .onnx: workload definition.
 - mapping: user-provided spatial mapping or spatial mapping restriction.
 - accelerator: hardware definition.
@@ -22,7 +22,7 @@ The repository includes three examples provided in the `run.sh` script, which ar
 
 The output will be saved under `outputs/` folder.
 
-API is also created in zigzag/api.py, which can be directly called externally.
+API is also created in `zigzag/api.py`, which can be directly called externally.
 
 **Note**: Since CACTI is not supported on Windows, please run these example on Linuxs, or else user-defined memory cost value should be provided in the input hardware file.
 
@@ -79,7 +79,7 @@ The current integrated IMC model has certain limitations and is applicable only 
 
 
 ## Publication pointers
-- J. Sun, P. Houshmand and M. Verhelst, "Analog or Digital In-Memory Computing? Benchmarking through Quantitative Modeling," Proceedings of the IEEE/ACM Internatoinal Conference On Computer Aided Design (ICCAD), October 2023.
+- J. Sun, P. Houshmand and M. Verhelst, "Analog or Digital In-Memory Computing? Benchmarking through Quantitative Modeling," Proceedings of the IEEE/ACM Internatoinal Conference On Computer Aided Design (ICCAD), October 2023. [poster](https://drive.google.com/file/d/1EVdua-y2Wg8WL-ovUIw7KUR9kpnpN4AS/view?usp=sharing), [slides](https://docs.google.com/presentation/d/19OXRDh6NCBUIOVGneO3lrZfVT58xh06U/edit?usp=sharing&ouid=108247328431603587200&rtpof=true&sd=true), [video](https://drive.google.com/file/d/10-k4XEPan-O-QAH4Q0uvone36qfNRCpK/view?usp=sharing)
 
 - P. Houshmand, J. Sun and M. Verhelst, "Benchmarking and modeling of analog and digital SRAM in-memory computing architectures," arXiv preprint arXiv:2305.18335 (2023). [paper](https://arxiv.org/abs/2305.18335)
 
