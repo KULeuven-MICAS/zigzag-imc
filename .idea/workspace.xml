@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1b4fd860-b9e8-491d-8907-63be57d4edbf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zigzag/visualization/list_of_cmes.pickle" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,13 +24,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/users/micas/jsun/sunjc/codes/branch_for_updating_zigzag_imc/zigzag-imc_fork"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/users/micas/jsun/sunjc/codes/branch_for_updating_zigzag_imc/zigzag-imc_fork&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python.debug">
     <configuration name="api" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="zigzag-imc_fork" />
