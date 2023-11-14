@@ -12,11 +12,19 @@ logger = logging.getLogger(__name__)
 class AcceleratorParserStage(Stage):
     def __init__(self, list_of_callables, *, accelerator, **kwargs):
         super().__init__(list_of_callables, **kwargs)
-        self.accelerator_parser = AcceleratorParser(accelerator)
+        if type(accelerator) == 'str':
+            self.accelerator_parser = AcceleratorParser(accelerator)
+        else:
+            self.accelerator_parser = None
+            self.accelerator_model = accelerator
 
     def run(self):
-        self.accelerator_parser.run()
-        accelerator = self.accelerator_parser.get_accelerator()
+        if self.accelerator_parser is not None:
+            self.accelerator_parser.run()
+            accelerator = self.accelerator_parser.get_accelerator()
+        else:
+            accelerator = self.accelerator_model
+
         sub_stage = self.list_of_callables[0](self.list_of_callables[1:], accelerator=accelerator, **self.kwargs)
         for cme, extra_info in sub_stage.run():
             yield cme, extra_info

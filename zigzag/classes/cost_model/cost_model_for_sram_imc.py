@@ -199,6 +199,7 @@ class CostModelEvaluationForIMC:
         # get imc area
         operational_array = self.accelerator.get_core(self.core_id).operational_array
         self.imc_area = operational_array.total_area
+        print(self.imc_area)
         self.imc_area_breakdown = operational_array.area_breakdown
         # get mem area
         self.mem_area = 0
