@@ -783,7 +783,8 @@ class Mapping:
                     rd_out_to_high_da,
                     wr_in_by_high_da,
                 )
-
+        
+        self.unit_mem_data_movement[operand][mem_level].req_mem_bw_aver
         # For output operand 
         output_operand = self.layer_node.output_operand
         for mem_level in range(self.mem_level[output_operand]):

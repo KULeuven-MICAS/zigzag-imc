@@ -157,3 +157,6 @@ zigzag/classes/cacti/cacti_master/self_gen/
 
 # debug file
 debug.py
+
+# vim tmp files
+*.swp

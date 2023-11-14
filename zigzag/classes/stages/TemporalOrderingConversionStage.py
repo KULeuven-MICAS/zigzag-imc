@@ -45,6 +45,7 @@ class TemporalOrderingConversionStage(Stage):
     ## Run this stage by converting the user-defined temporal loop ordering
     # to the memory-level based temporal mapping representation.
     def run(self):
+        breakpoint()
         temporal_mapping = self.convert_user_temporal_mapping(
             self.layer.user_temporal_ordering
         )

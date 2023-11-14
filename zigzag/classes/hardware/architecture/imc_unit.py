@@ -12,7 +12,7 @@ else:
 
 class LogicUnit:
     """cost (energy, area, delay) of 1b adder, 1b multiplier, 1b register is defined in this class"""
-    def __init__(self, tech_param:dict):
+    def __init__(self, tech_param:dict, group_depth: int):
         """
         Input example:
         tech_param_28nm = {
@@ -34,6 +34,7 @@ class LogicUnit:
         self.tech_param = tech_param
         self.tech_param["wl_cap"] = tech_param["nd2_cap"]/2 # wordline cap of each SRAM cell is treated as NAND2_cap/2
         self.tech_param["bl_cap"] = tech_param["nd2_cap"]/2  # bitline cap of each SRAM cell is treated as NAND2_cap/2
+        self.group_depth = group_depth
 
     def check_tech_param(self, tech_param):
         required_param = ["tech_node", "vdd", "nd2_cap", "nd2_area", "nd2_dly", "xor2_cap", "xor2_area", "xor2_dly", "dff_cap", "dff_area"]
@@ -81,6 +82,13 @@ class LogicUnit:
         """area of 1b DFF"""
         return self.tech_param["dff_area"]
 
+    def get_group_depth_dly(self):
+        """delay of group_depth"""
+        k3 = 0.00653 # ns
+        k4 = 0.640 # ns
+
+        return (k3*self.group_depth + k4) # unit: ns
+
     def get_1b_adder_dly_in2sum(self):
         """delay of 1b adder: input to sum-out"""
         adder_dly = 2 * self.tech_param["xor2_dly"]
@@ -116,11 +124,12 @@ class ImcUnit:
         self.dimensions = dimensions
         self.wl_dim = hd_param["wordline_dimension"] # wl_dim should be the same with the dimension served by input_reg.
         self.bl_dim = hd_param["bitline_dimension"] # bl_dim should be the same with the dimension served by output_reg.
+        self.group_depth = hd_param['group_depth']
         self.wl_dim_size = dimensions[self.wl_dim] # dimension where wordline is
         self.bl_dim_size = dimensions[self.bl_dim] # dimension where bitline (adder tree) is
         self.nb_of_banks = math.prod([dimensions[oa_dim] for oa_dim in dimensions if oa_dim not in [self.wl_dim, self.bl_dim]])
         # tech_param will be checked and initialized in LogicUnit class
-        self.logic_unit = LogicUnit(tech_param)
+        self.logic_unit = LogicUnit(tech_param, self.group_depth)
         # parameters to be updated in function
         self.energy = None
         self.energy_breakdown = None

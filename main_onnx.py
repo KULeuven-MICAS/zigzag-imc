@@ -226,12 +226,15 @@ def cores_dut(array_size, m):
 
 
 array_size_list = [{'D1':128,'D2':128}]
-m_list= [16]
+m_list= [1,2,4,8,16,32,64]
 
 for array_size in array_size_list:
     for m in m_list:
-        array_size['D2'] /= m
-        cores = cores_dut(array_size, m)
+        array_size_cp = array_size.copy()
+        array_size_cp['D1'] /= m
+        print('Array size', array_size_cp)
+        print('M factor', m)
+        cores = cores_dut(array_size_cp, m)
         acc_name = "1"
         accelerator = Accelerator(acc_name, cores)
         # Get the onnx model, the mapping and accelerator arguments

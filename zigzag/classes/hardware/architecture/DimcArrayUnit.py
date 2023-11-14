@@ -156,7 +156,8 @@ class DimcArrayUnit(ImcUnit):
             "mults":    dly_mults,
             "adders":   dly_adders,
             "adders_pv":dly_adders_pv,
-            "accumulators": dly_accumulators
+            "accumulators": dly_accumulators,
+            "group_depth": self.logic_unit.get_group_depth_dly()
         }
         self.delay = sum([v for v in self.delay_breakdown.values()])
         # return self.delay_breakdown
