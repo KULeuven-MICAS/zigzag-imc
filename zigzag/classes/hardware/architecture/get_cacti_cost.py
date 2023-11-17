@@ -487,15 +487,15 @@ def get_cacti_cost(cacti_path, tech_node, mem_type, mem_size_in_byte, bw, hd_has
                     pass
     # get required cost
     try:
-        access_time = scaling_factor*float(result[' Access time (ns)'][0]) # unit: ns
+        access_time = scaling_factor*float(result[' Access time (ns)'][-1]) # unit: ns
         if bw > 32:
-            area    = scaling_factor*float(result[' Area (mm2)'][0]) * 2 * bw/32 # unit: mm2
-            r_cost  = scaling_factor*float(result[' Dynamic read energy (nJ)'][0]) * bw/32 # unit: nJ
-            w_cost  = scaling_factor*float(result[' Dynamic write energy (nJ)'][0]) * bw/32 # unit: nJ
+            area    = scaling_factor*float(result[' Area (mm2)'][-1]) * 2 * bw/32 # unit: mm2
+            r_cost  = scaling_factor*float(result[' Dynamic read energy (nJ)'][-1]) * bw/32 # unit: nJ
+            w_cost  = scaling_factor*float(result[' Dynamic write energy (nJ)'][-1]) * bw/32 # unit: nJ
         else:
-            area    = scaling_factor*float(result[' Area (mm2)'][0]) * 2 # unit: mm2
-            r_cost  = scaling_factor*float(result[' Dynamic read energy (nJ)'][0]) # unit: nJ
-            w_cost  = scaling_factor*float(result[' Dynamic write energy (nJ)'][0]) # unit: nJ
+            area    = scaling_factor*float(result[' Area (mm2)'][-1]) * 2 # unit: mm2
+            r_cost  = scaling_factor*float(result[' Dynamic read energy (nJ)'][-1]) # unit: nJ
+            w_cost  = scaling_factor*float(result[' Dynamic write energy (nJ)'][-1]) # unit: nJ
     except KeyError:
         _logging.critical(f'**KeyError** in result, current result: {result}')
         breakpoint()

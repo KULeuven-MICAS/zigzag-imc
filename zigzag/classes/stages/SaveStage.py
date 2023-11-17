@@ -134,8 +134,10 @@ class PickleSaveStage(Stage):
     # This should be placed above a ReduceStage such as the SumStage, as we assume the list of CMEs is passed as extra_info
     def run(self) -> Generator[Tuple[CostModelEvaluation, Any], None, None]:
         substage = self.list_of_callables[0](self.list_of_callables[1:], **self.kwargs)
+        all_cmes = []
         for id, (cme, extra_info) in enumerate(substage.run()):
-            all_cmes = [cme for (cme, extra) in extra_info]
+            #all_cmes = [cme for (cme, extra) in extra_info]
+            all_cmes += [cme]# for (cme, extra) in extra_info]
             yield cme, extra_info
         # After we have received all the CMEs, save them to the specified output location.
         dirname = os.path.dirname(self.pickle_filename)

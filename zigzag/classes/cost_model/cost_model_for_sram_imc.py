@@ -199,7 +199,7 @@ class CostModelEvaluationForIMC:
         # get imc area
         operational_array = self.accelerator.get_core(self.core_id).operational_array
         self.imc_area = operational_array.total_area
-        print('Area', self.imc_area)
+        #print('Area', self.imc_area)
         self.imc_area_breakdown = operational_array.area_breakdown
         # get mem area
         self.mem_area = 0
@@ -716,7 +716,7 @@ class CostModelEvaluationForIMC:
                 real_data_trans_cycle[layer_op].append(real_data_trans)
                 """ =========================================real_data_trans_cycle(above)======================================= """
 
-        print("AVG", self.mapping_int.unit_mem_data_movement['I'][1].req_mem_bw_aver)
+        #print("AVG", self.mapping_int.unit_mem_data_movement['I'][1].req_mem_bw_aver)
         self.allowed_mem_updat_cycle = allowed_mem_updat_cycle
         self.real_data_trans_cycle = real_data_trans_cycle
 
@@ -822,7 +822,7 @@ class CostModelEvaluationForIMC:
 
         # Step 3: fetch tclk information
         self.tclk = operational_array.tclk
-        print('T_CLK', self.tclk)
+        #print('T_CLK', self.tclk)
         self.tclk_breakdown = operational_array.tclk_breakdown
         # TODO: [jiacong] [FINISH]
 
@@ -1024,7 +1024,7 @@ class CostModelEvaluationForIMC:
         # the ideal temporal cycle count given the spatial mapping (the spatial mapping can be non-ideal)
         ideal_temporal_cycle = self.mapping_int.temporal_mapping.total_cycle
         #print(self.mapping_int.temporal_mapping.temporal_mapping_dict['I'])
-        print(self.mapping_int.temporal_mapping.mapping_dic_origin['I'])
+        #print(self.mapping_int.temporal_mapping.mapping_dic_origin['I'])
 
         # TODO: [jiacong] [ADD]
         # scale ideal_temporal_cycle considering bit-serial input of imc
