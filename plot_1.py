@@ -40,7 +40,8 @@ def get_df(directory):
                 'D1':l.accelerator.cores[0].operational_array.dimensions[0].size,
                 'D2':l.accelerator.cores[0].operational_array.dimensions[1].size,
                 "cfg": f"M{int(l.accelerator.cores[0].operational_array.unit.group_depth)} D1:{int(l.accelerator.cores[0].operational_array.dimensions[0].size)} D2:{int(l.accelerator.cores[0].operational_array.dimensions[1].size)}",
-                "bw": l.mapping_int.unit_mem_data_movement['I'][1].req_mem_bw_aver.rd_out_to_low})
+                "bw": l.mapping_int.unit_mem_data_movement['I'][1].req_mem_bw_aver.rd_out_to_low,
+                "bw_weight": l.mapping_int.unit_mem_data_movement['W'][1].req_mem_bw_aver.rd_out_to_low})
         data = pd.DataFrame(df_data)
         if df.empty:
             df = data
@@ -50,27 +51,29 @@ def get_df(directory):
     return df
 
 def fig_plot():
-    df = get_df("./outputs/")
+    df = get_df("./outputs_resnet8_9x9/")
     df = df.sort_values(by=['M','cfg'],ignore_index=True)
     df['latency'] = df['latency_cc'] * df['tclk']
     df['latency_total'] = df['latency_cc'] + df['weight_loading_cc']
     df['ActD1'] = df['D1'] * df['M']
-    breakpoint()
-    df_fixed_array_size = df[(df.ActD1 == 128) & (df.D2 ==128) & (df.layer == 2)]
-    df = df.groupby(['cfg'], sort=False, as_index=False).agg({'bw': ['max'],'energy_total':['sum'], 'latency_total':['sum'],'tclk':['mean'],'area':['mean'],'M':['mean'],'D2':['mean']})
+    df['EDP']  = df['energy_total'] * df['latency_total']
+    df['Dtot'] = df['D1'] * df['D2']
+    df_fixed_array_size = df[(df.ActD1 == 128*9) & (df.D2 ==128*9) & (df.layer == 2)]
+    df = df.groupby(['cfg'], sort=False, as_index=False).agg({'bw': ['max'],'bw_weight':['max'],'energy_total':['sum'], 'latency_total':['sum'],'tclk':['mean'],'area':['mean'],'M':['mean'],'D2':['mean']})
     df.columns = [x[0] for x in df.columns]
-    dfx = df.sort_values(by=['area','latency_total'],ascending=[True,True],ignore_index=True).drop_duplicates('cfg')
-    dfx['M'] = dfx['M'].astype(str)
     df['M'] = df['M'].astype(str)
+    #dfx = df.sort_values(by=['energy_total','latency_total'],ascending=[True,True],ignore_index=True).drop_duplicates('cfg')
+    dfx = df
+    dfx = dfx.sort_values(by=['bw'],ignore_index=True)
+    dfx['bw'] = dfx['bw'].astype(str)
     df_fixed_array_size['M'] = df_fixed_array_size['M'].astype(str)
-    fig = px.scatter(dfx,'latency_total','area',size='bw',color='M',hover_data=['cfg'],log_x=True,log_y=True)
+    fig = px.scatter(dfx,'area','latency_total',color='bw',hover_data=['cfg'],log_x=True,log_y=True)
     fig.show()
     fig = px.scatter(dfx,'area','energy_total',color='M',hover_data=['cfg'],log_x=True,log_y=True)
     fig.show()
+    fig = px.scatter(dfx,'bw_weight','latency_total',color='M',hover_data=['cfg'],log_x=False,log_y=True)
+    fig.show()
     breakpoint()
-
-
-
     # stupid plot to show bandwidth, area, latency tradeoff
     fig = px.scatter(df_fixed_array_size, 'latency_cc', 'area', size='bw',color='M', text='bw',hover_data=['cfg'], log_x=True, log_y=True)
     fig.update_traces(textposition='top center')

@@ -226,7 +226,7 @@ def cores_dut(array_size, m):
 
 
 array_size_list = [{'D1':64,'D2':64}]
-array_sizes = [32, 64,128,256]
+array_sizes = [16*9,32*9, 64*9,128*9]
 m_list= [1,2,4,8,16,32,64]
 
 for d1 in array_sizes:
