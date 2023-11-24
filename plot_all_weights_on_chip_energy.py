@@ -41,8 +41,7 @@ def get_df(directory):
                 'tclk_breakdown':l.tclk_breakdown,
                 'mem_energy_breakdown':l.mem_energy_breakdown,
                 'MAC_energy_breakdown':l.MAC_energy_breakdown,
-                #'energy_total': sum([sum(v) for v in l.mem_energy_breakdown.values()] + [x for x in l.MAC_energy_breakdown.values()]),
-                'energy_total': sum([x for x in l.MAC_energy_breakdown.values()]),
+                'energy_total': sum([sum(v[:-1]) for k,v in l.mem_energy_breakdown.items() if k in ['I','O']] + [x for x in l.MAC_energy_breakdown.values()]),
                 'M': l.accelerator.cores[0].operational_array.unit.group_depth,
                 'D1':l.accelerator.cores[0].operational_array.dimensions[0].size,
                 'D2':l.accelerator.cores[0].operational_array.dimensions[1].size,
@@ -58,7 +57,7 @@ def get_df(directory):
     return df
 
 def fig_plot():
-    df = get_df("./outputs_resnet8_9x9/dram_sram_onchip/")
+    df = get_df("./outputs_resnet8_9x9/")
     df = df[df.weight_unrolled == True]
     dfx = df.sort_values(by=['area','latency_cc'],ascending=[True,True],ignore_index=True).drop_duplicates(['layer', 'latency_cc'])
     fig = px.scatter(dfx, 'area', 'latency_cc',facet_col ='layer',facet_col_wrap=4,hover_data=['cfg'])
@@ -78,19 +77,16 @@ def fig_plot():
         area, latency_cc = 0, 0
         for ii_layer, layer in enumerate(dfx.layer.unique()):
             area += dfx[(dfx.layer == layer) & (dfx.cfg == cfgc[ii_layer])].iloc[0]['area']
-            latency_cc += dfx[(dfx.layer == layer) & (dfx.cfg == cfgc[ii_layer])].iloc[0]['latency_cc']
-        total_points.append({'cfg':cfgc,'area':area,'latency_total':latency_cc})
+            latency_cc += dfx[(dfx.layer == layer) & (dfx.cfg == cfgc[ii_layer])].iloc[0]['energy_total']
+        total_points.append({'cfg':cfgc,'area':area,'energy_total':latency_cc})
     df_weights = pd.DataFrame(total_points)
 
     breakpoint()
-    with open("all_weights_pareto_resnet82.pkl","wb") as infile:
+    with open("all_weights_pareto_resnet8_energy.pkl","wb") as infile:
         pickle.dump(df_weights, infile)
     exit()
 
-    with open("all_weights_pareto_resnet82.pkl","rb") as infile:
-        df= pickle.load(infile)
-
-    fig = px.scatter(df, 'area','latency_cc')
+    fig = px.scatter(df, 'area','energy_total')
     fig.show()
 if __name__ == "__main__":
     fig_plot()

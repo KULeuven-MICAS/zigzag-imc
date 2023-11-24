@@ -53,6 +53,16 @@ def get_df(directory):
 def fig_plot():
     df = get_df("./outputs_resnet8_9x9/")
     df = df.sort_values(by=['M','cfg'],ignore_index=True)
+    dfa = df.drop_duplicates('layer')
+    weights = 0
+    for i,r in dfa.iterrows():
+        lds = r.loop_dim_size
+        try:
+            weights += lds['K'] * lds['C'] * lds['FX'] * lds['FY']
+        except:
+            weights += lds['K'] * lds['C']
+
+    print("Weights: ",weights)
     df['latency'] = df['latency_cc'] * df['tclk']
     df['latency_total'] = df['latency_cc'] + df['weight_loading_cc']
     df['ActD1'] = df['D1'] * df['M']

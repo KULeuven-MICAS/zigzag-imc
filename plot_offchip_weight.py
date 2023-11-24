@@ -35,14 +35,15 @@ def get_df(directory):
                 'area':l.imc_area,
                 'latency_cc':l.ideal_temporal_cycle,
                 'weight_loading_cc':l.SS_comb,
+                'dram_loading_weight':l.data_loading_cc_per_op['W']['W2_rd_out_to_low'][0],
+                'dram_loading_SS':l.port_activity_collect[5]['r_port_1'][0].SS,
                 'weight_tm':l.temporal_mapping.mapping_dic_origin['W'],
                 'weight_unrolled':all_weight_unrolled,
                 'tclk':l.tclk,
                 'tclk_breakdown':l.tclk_breakdown,
                 'mem_energy_breakdown':l.mem_energy_breakdown,
                 'MAC_energy_breakdown':l.MAC_energy_breakdown,
-                #'energy_total': sum([sum(v) for v in l.mem_energy_breakdown.values()] + [x for x in l.MAC_energy_breakdown.values()]),
-                'energy_total': sum([x for x in l.MAC_energy_breakdown.values()]),
+                'energy_total': sum([sum(v) for v in l.mem_energy_breakdown.values()] + [x for x in l.MAC_energy_breakdown.values()]),
                 'M': l.accelerator.cores[0].operational_array.unit.group_depth,
                 'D1':l.accelerator.cores[0].operational_array.dimensions[0].size,
                 'D2':l.accelerator.cores[0].operational_array.dimensions[1].size,
@@ -59,38 +60,15 @@ def get_df(directory):
 
 def fig_plot():
     df = get_df("./outputs_resnet8_9x9/dram_sram_onchip/")
-    df = df[df.weight_unrolled == True]
-    dfx = df.sort_values(by=['area','latency_cc'],ascending=[True,True],ignore_index=True).drop_duplicates(['layer', 'latency_cc'])
-    fig = px.scatter(dfx, 'area', 'latency_cc',facet_col ='layer',facet_col_wrap=4,hover_data=['cfg'])
+    df['latency_total'] = df['latency_cc'] + df['weight_loading_cc'] + df['dram_loading_weight'] + df['dram_loading_SS']
+    df = df.groupby(['cfg'], sort=False, as_index=False).agg({'bw': ['max'],'bw_weight':['max'],'energy_total':['sum'], 'latency_total':['sum'],'tclk':['mean'],'area':['mean'],'M':['mean'],'D2':['mean']})
+    df.columns = [x[0] for x in df.columns]
+#    df = df.sort_values(by=['area','latency_total'],ascending=[True,True],ignore_index=True).drop_duplicates(['layer','latency_total'])
+    fig = px.scatter(df, 'area', 'latency_total',hover_data=['cfg'])
     fig.show()
+    with open("offchip_weights_resnet8.pkl","wb") as infile:
+        pickle.dump(df, infile)
     breakpoint()
-    dfx = dfx.sort_values(by=['layer'],ascending=[True],ignore_index=True)
-    cfg_dict = {}
-    for layer_id in dfx.layer.unique():
-        cfg_dict[layer_id] = []
-        for cfg in dfx[dfx.layer == layer_id].cfg.unique():
-            cfg_dict[layer_id].append(cfg)
-    from itertools import product
-    cfg_combinations = list(product(*[v for v in cfg_dict.values()]))
-    total_points = []
-    for ii_cfgc, cfgc in enumerate(cfg_combinations):
-        print(f'{ii_cfgc/len(cfg_combinations):.2f}',end='\r')
-        area, latency_cc = 0, 0
-        for ii_layer, layer in enumerate(dfx.layer.unique()):
-            area += dfx[(dfx.layer == layer) & (dfx.cfg == cfgc[ii_layer])].iloc[0]['area']
-            latency_cc += dfx[(dfx.layer == layer) & (dfx.cfg == cfgc[ii_layer])].iloc[0]['latency_cc']
-        total_points.append({'cfg':cfgc,'area':area,'latency_total':latency_cc})
-    df_weights = pd.DataFrame(total_points)
 
-    breakpoint()
-    with open("all_weights_pareto_resnet82.pkl","wb") as infile:
-        pickle.dump(df_weights, infile)
-    exit()
-
-    with open("all_weights_pareto_resnet82.pkl","rb") as infile:
-        df= pickle.load(infile)
-
-    fig = px.scatter(df, 'area','latency_cc')
-    fig.show()
 if __name__ == "__main__":
     fig_plot()
