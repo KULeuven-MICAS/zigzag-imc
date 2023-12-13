@@ -79,7 +79,7 @@ The current integrated IMC model has certain limitations and is applicable only 
 
 
 ## Publication pointers
-- J. Sun, P. Houshmand and M. Verhelst, "Analog or Digital In-Memory Computing? Benchmarking through Quantitative Modeling," Proceedings of the IEEE/ACM Internatoinal Conference On Computer Aided Design (ICCAD), October 2023. [poster](https://drive.google.com/file/d/1EVdua-y2Wg8WL-ovUIw7KUR9kpnpN4AS/view?usp=sharing), [slides](https://docs.google.com/presentation/d/19OXRDh6NCBUIOVGneO3lrZfVT58xh06U/edit?usp=sharing&ouid=108247328431603587200&rtpof=true&sd=true), [video](https://drive.google.com/file/d/10-k4XEPan-O-QAH4Q0uvone36qfNRCpK/view?usp=sharing)
+- J. Sun, P. Houshmand and M. Verhelst, "Analog or Digital In-Memory Computing? Benchmarking through Quantitative Modeling," Proceedings of the IEEE/ACM Internatoinal Conference On Computer Aided Design (ICCAD), October 2023. [paper](https://ieeexplore.ieee.org/document/10323763), [poster](https://drive.google.com/file/d/1EVdua-y2Wg8WL-ovUIw7KUR9kpnpN4AS/view?usp=sharing), [slides](https://docs.google.com/presentation/d/19OXRDh6NCBUIOVGneO3lrZfVT58xh06U/edit?usp=sharing&ouid=108247328431603587200&rtpof=true&sd=true), [video](https://drive.google.com/file/d/10-k4XEPan-O-QAH4Q0uvone36qfNRCpK/view?usp=sharing)
 
 - P. Houshmand, J. Sun and M. Verhelst, "Benchmarking and modeling of analog and digital SRAM in-memory computing architectures," arXiv preprint arXiv:2305.18335 (2023). [paper](https://arxiv.org/abs/2305.18335)
 
