@@ -8,6 +8,7 @@ from zigzag.classes.hardware.architecture.core import Core
 from zigzag.classes.hardware.architecture.ImcArray import ImcArray
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_w_cost_per_weight_from_cacti
 from zigzag.classes.hardware.architecture.get_cacti_cost import get_cacti_cost
+import numpy as np
 import argparse
 import re
 from multiprocessing import Process, Value, Manager, Lock
@@ -18,7 +19,7 @@ from termcolor import cprint
 
 
 
-def memory_hierarchy_dut(imc_array, weight_sram_size, visualize=False):
+def memory_hierarchy_dut(imc_array, weight_sram_size, act_sram_size, visualize=False):
     """ [OPTIONAL] Get w_cost of imc cell group from CACTI if required """
     cacti_path = "zigzag/classes/cacti/cacti_master"
     tech_param = imc_array.unit.logic_unit.tech_param
@@ -76,13 +77,13 @@ def memory_hierarchy_dut(imc_array, weight_sram_size, visualize=False):
 
     ##################################### on-chip memory hierarchy building blocks #####################################
 
-    sram_size = 256 * 1024 # unit: byte
-    sram_bw = 256#max(imc_array.unit.bl_dim_size * hd_param["input_precision"] * imc_array.unit.nb_of_banks,
+    sram_size = act_sram_size # unit: byte
+    sram_bw = 128#max(imc_array.unit.bl_dim_size * hd_param["input_precision"] * imc_array.unit.nb_of_banks,
                   #imc_array.unit.wl_dim_size * output_precision * imc_array.unit.nb_of_banks)
     ac_time, sram_area, sram_r_cost, sram_w_cost = get_cacti_cost(cacti_path, tech_param["tech_node"], "sram",
                                                                   sram_size, sram_bw,
                                                                   hd_hash=str(hash((sram_size, sram_bw, random.randbytes(8)))))
-    weight_sram_bw = 256#imc_array.unit.wl_dim_size * hd_param["weight_precision"] * imc_array.unit.nb_of_banks
+    weight_sram_bw = 128#imc_array.unit.wl_dim_size * hd_param["weight_precision"] * imc_array.unit.nb_of_banks
     weight_ac_time, weight_sram_area, weight_sram_r_cost, weight_sram_w_cost = get_cacti_cost(cacti_path, tech_param["tech_node"], "sram",
                                                                   weight_sram_size, weight_sram_bw,
                                                                   hd_hash=str(hash((weight_sram_size, weight_sram_bw, random.randbytes(8)))))
@@ -122,7 +123,7 @@ def memory_hierarchy_dut(imc_array, weight_sram_size, visualize=False):
     #######################################################################################################################
 
     dram_size = 1*1024*1024*1024 # unit: byte
-    dram_ac_cost_per_bit = 1200 # unit: pJ/bit
+    dram_ac_cost_per_bit = 3.7# unit: pJ/bit
     dram_bw = 32#imc_array.unit.wl_dim_size * hd_param["weight_precision"] * imc_array.unit.nb_of_banks
     dram_100MB_32_3r_3w = MemoryInstance(
         name="dram_1GB",
@@ -259,6 +260,7 @@ def imc_array_dut(array_size, m):
         "wordline_dimension": "D1",         # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension": "D2",          # hardware dimension where bitline is (corresponds to the served dimension of output regs)
         "enable_cacti":         True,       # use CACTI to estimated cell array area cost (cell array exclude build-in logic part)
+        "adc_resolution": max(1, 0.5 * np.log2(array_size['D1']))
         # Energy of writing weight. Required when enable_cacti is False.
         # "w_cost_per_weight_writing": 0.08,  # [OPTIONAL] unit: pJ/weight.
     }
@@ -275,48 +277,57 @@ def imc_array_dut(array_size, m):
 
     return imc_array
 
-def cores_dut(array_size, m, weight_sram_size):
+def cores_dut(array_size, m, weight_sram_size, act_sram_size):
     imc_array1 = imc_array_dut(array_size, m)
-    memory_hierarchy1 = memory_hierarchy_dut(imc_array1, weight_sram_size)
+    memory_hierarchy1 = memory_hierarchy_dut(imc_array1, weight_sram_size, act_sram_size)
 
     core1 = Core(1, imc_array1, memory_hierarchy1)
 
     return {core1}
 
 
-def runner(d1, d2, d3, m):
+def runner(d1, d2, d3, m, wl_name, hw_name):
+    # Get the onnx model, the mapping and accelerator arguments
+    experiment_id = f"{hw_name}-{wl_name}"
+    pkl_name = f'{experiment_id}-saved_list_of_cmes'
+
+
     array_size_cp = {'D1':d1, 'D2':d2, 'D3': d3}
     array_size_cp['D1'] /= m
     if not all([x >= 1 for x in array_size_cp.values()]):
         exit()
     # RESNET8
-    weight_sram_size = 77360
+    if wl_name == 'resnet8':
+        weight_sram_size = 77360
+        act_sram_size = 32768 
+
+    # deepautoencoder
+    if wl_name == 'deepautoencoder':
+        weight_sram_size = 264192
+        act_sram_size = 768 + 1024
+
+    # ds-cnn 
+    if wl_name == 'ds_cnn':
+        weight_sram_size = 22016
+        act_sram_size = 16000
+
+    # mobilenet v1
+    if wl_name == 'mobilenet_v1':
+        weight_sram_size = 208112
+        act_sram_size = 55296
+
+
     print('Array size', array_size_cp)
     print('M factor', m)
-    print('ResNet8 Weight memory requirements', weight_sram_size)
-    cores = cores_dut(array_size_cp, m, weight_sram_size)
+    cores = cores_dut(array_size_cp, m, weight_sram_size, act_sram_size)
     acc_name = "1"
     accelerator = Accelerator(acc_name, cores)
-    # Get the onnx model, the mapping and accelerator arguments
-    parser = argparse.ArgumentParser(description="Setup zigzag inputs")
-    parser.add_argument('--model', metavar='path', required=True, help='path to onnx model, e.g. inputs/examples/my_onnx_model.onnx')
-    parser.add_argument('--mapping', metavar='path', required=True, help='path to mapping file, e.g., inputs.examples.my_mapping')
-    parser.add_argument('--accelerator', metavar='path', required=True, help='module path to the accelerator, e.g. inputs.examples.accelerator1')
-    args = parser.parse_args()
-
     # Initialize the logger
     import logging as _logging
     _logging_level = _logging.INFO
     _logging_format = '%(asctime)s - %(funcName)s +%(lineno)s - %(levelname)s - %(message)s'
     _logging.basicConfig(level=_logging_level,
                          format=_logging_format)
-
-    hw_name = args.accelerator.split(".")[-1]
-    wl_name = re.split(r"/|\.", args.model)[-1]
-    if wl_name == 'onnx':
-        wl_name = re.split(r"/|\.", args.model)[-2]
-    experiment_id = f"{hw_name}-{wl_name}"
-    pkl_name = f'{experiment_id}-saved_list_of_cmes'
 
     # Initialize the MainStage which will start execution.
     # The first argument of this init is the list of stages that will be executed in sequence.
@@ -338,7 +349,7 @@ def runner(d1, d2, d3, m):
         workload=args.model,  # required by ONNXModelParserStage
         mapping=args.mapping,  # required by ONNXModelParserStage
         dump_filename_pattern=f"outputs/{experiment_id}-layer_?.json",  # output file save pattern
-        pickle_filename=f"outputs/{experiment_id}-layer_d1_{d1}_d2_{d2}_m_{m}.pkl",  # output file save pattern
+        pickle_filename=f"outputs_{wl_name}/dimc/{experiment_id}-layer_d1_{d1}_d2_{d2}_d3_{d3}_m_{m}.pkl",  # output file save pattern
         loma_lpf_limit=6,  # required by LomaStage
         loma_show_progress_bar=True,  # shows a progress bar while iterating over temporal mappings
         enable_mix_spatial_mapping_generation=True,  # True: enable generating mix spatial mapping. False: single layer dim mapping during the autogeneration
@@ -351,21 +362,58 @@ def runner(d1, d2, d3, m):
 
 
 if __name__ == "__main__":
-    array_sizes = [8*9, 16*9, 32*9, 64*9, 128*9]
-    array_size_d3 = [1, 4, 8, 16]
-    m_list = [1, 2, 4, 8, 16, 32]
+    parser = argparse.ArgumentParser(description="Setup zigzag inputs")
+    parser.add_argument('--model', metavar='path', required=True, help='path to onnx model, e.g. inputs/examples/my_onnx_model.onnx')
+    parser.add_argument('--mapping', metavar='path', required=True, help='path to mapping file, e.g., inputs.examples.my_mapping')
+    parser.add_argument('--accelerator', metavar='path', required=True, help='module path to the accelerator, e.g. inputs.examples.accelerator1')
+    args = parser.parse_args()
+    hw_name = args.accelerator.split(".")[-1]
+    wl_name = re.split(r"/|\.", args.model)[-1]
+    if wl_name == 'onnx':
+        wl_name = re.split(r"/|\.", args.model)[-2]
+    
+    # ResNet8
+    if wl_name == 'resnet8':
+        array_sizes = [8*9, 16*9, 32*9, 64*9, 128*9]
+        array_size_d3 = [1, 4, 8, 16]
+        m_list = [1, 2, 4, 8, 16, 32]
+
+    # AE
+    if wl_name == 'deepautoencoder':
+        array_sizes = [8, 32, 64, 128, 640]
+        array_size_d3 = [1, 4, 8, 16]
+        m_list = [1, 2, 4, 8, 16, 32]
+
+    # DS CNN 
+    if wl_name == 'ds_cnn':
+        array_sizes = [9, 8*9, 16*9, 32*9, 64*9, 128*9]
+        array_size_d3 = [1, 4, 8, 16]
+        m_list = [1, 2, 4, 8, 16, 32]
+
+    # MOBILENETV1
+    if wl_name == 'mobilenet_v1':
+        array_sizes = [9, 16*9, 32*9, 64*9, 128*9, 256*9]
+        array_size_d3 = [1, 4, 8, 16]
+        m_list = [1, 2, 4, 8, 16, 32]
+
+    array_sizes = [9, 32, 8*9, 16*9,32*9,64*9]
+    array_sizes = [32,8*9,16*9, 32*9,64*9]
+    array_size_d3 = [1,4, 8,16,64]
+    array_size_d3 = [4,16,8]
+    m_list = [1,2,4,16,64]
+
 
     from itertools import product
    
     rc_list = list(product(*[array_sizes, array_sizes, array_size_d3, m_list]))
-    chunks = 120
+    chunks = 150
     rc_list_chunk = [rc_list[i:i + chunks] for i in range(0, len(rc_list), chunks)]
 
     for rcc in rc_list_chunk:
-        TIMEOUT = 36000
+        TIMEOUT = 600
         start = time.time()
             
-        procs = [Process(target=runner, args=(d1,d2,d3,m)) for d1,d2,d3,m in rcc]
+        procs = [Process(target=runner, args=(d1,d2,d3,m,wl_name,hw_name)) for d1,d2,d3,m in rcc]
 
         for p in procs : p.start()
         while time.time() - start <= TIMEOUT:

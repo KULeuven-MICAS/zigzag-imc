@@ -534,9 +534,17 @@ class DimcArrayUnit(ImcUnit):
             single_adder_tree_energy = fully_activated_number_of_1b_adder * logic_unit.get_1b_adder_energy() + \
                                        half_activated_number_of_1b_adder * logic_unit.get_1b_adder_energy_half_activated()
             nb_of_activation_times = mapped_cols * layer_act_operand_pres * macro_activation_times
+            #print(single_adder_tree_energy)
+            #print(nb_of_activation_times)
+            #print(fully_activated_number_of_1b_adder)
+            #print(logic_unit.get_1b_adder_energy())
+            #print(half_activated_number_of_1b_adder)
+            #print(logic_unit.get_1b_adder_energy_half_activated())
+            #breakpoint()
+
             energy_adders = single_adder_tree_energy * nb_of_activation_times
-        else:
-            energy_adders = 0
+        #else:
+        #    energy_adders = 0
         return energy_adders, adder_output_pres
 
     def get_adder_pv_energy(self, nb_inputs_of_adder_pv, input_precision, logic_unit, layer_act_operand_pres, input_bit_per_cycle, mapped_cols, macro_activation_times):
