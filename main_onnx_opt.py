@@ -1,13 +1,6 @@
 from zigzag.classes.stages import *
 import os
 import random
-from zigzag.classes.hardware.architecture.memory_hierarchy import MemoryHierarchy
-from zigzag.classes.hardware.architecture.memory_instance import MemoryInstance
-from zigzag.classes.hardware.architecture.accelerator import Accelerator
-from zigzag.classes.hardware.architecture.core import Core
-from zigzag.classes.hardware.architecture.ImcArray import ImcArray
-from zigzag.classes.hardware.architecture.get_cacti_cost import get_w_cost_per_weight_from_cacti
-from zigzag.classes.hardware.architecture.get_cacti_cost import get_cacti_cost
 import argparse
 import re
 
@@ -278,75 +271,61 @@ def cores_dut(array_size, m, weight_sram_size):
     return {core1}
 
 
-array_sizes = [8*9, 16*9, 32*9, 64*9, 128*9]
-array_size_d3 = [1, 4, 8, 16]
-m_list = [1, 2, 4, 8, 16, 32]
 
-for d1 in array_sizes:
-    for d2 in array_sizes:
-        for d3 in array_size_d3:
-            for m in m_list:
-                array_size_cp = {'D1':d1, 'D2':d2, 'D3': d3}
-                array_size_cp['D1'] /= m
-                if not all([x >= 1 for x in array_size_cp.values()]):
-                    continue
+d1,d2,d3,m = 72,72,1,1
 
-                # RESNET8
-                weight_sram_size = 77360
-                print('Array size', array_size_cp)
-                print('M factor', m)
-                print('ResNet8 Weight memory requirements', weight_sram_size)
-                cores = cores_dut(array_size_cp, m, weight_sram_size)
-                acc_name = "1"
-                accelerator = Accelerator(acc_name, cores)
-                # Get the onnx model, the mapping and accelerator arguments
-                parser = argparse.ArgumentParser(description="Setup zigzag inputs")
-                parser.add_argument('--model', metavar='path', required=True, help='path to onnx model, e.g. inputs/examples/my_onnx_model.onnx')
-                parser.add_argument('--mapping', metavar='path', required=True, help='path to mapping file, e.g., inputs.examples.my_mapping')
-                parser.add_argument('--accelerator', metavar='path', required=True, help='module path to the accelerator, e.g. inputs.examples.accelerator1')
-                args = parser.parse_args()
+# RESNET8
+# Get the onnx model, the mapping and accelerator arguments
+parser = argparse.ArgumentParser(description="Setup zigzag inputs")
+parser.add_argument('--model', metavar='path', required=True, help='path to onnx model, e.g. inputs/examples/my_onnx_model.onnx')
+parser.add_argument('--mapping', metavar='path', required=True, help='path to mapping file, e.g., inputs.examples.my_mapping')
+parser.add_argument('--accelerator', metavar='path', required=True, help='module path to the accelerator, e.g. inputs.examples.accelerator1')
+args = parser.parse_args()
 
-                # Initialize the logger
-                import logging as _logging
-                _logging_level = _logging.INFO
-                _logging_format = '%(asctime)s - %(funcName)s +%(lineno)s - %(levelname)s - %(message)s'
-                _logging.basicConfig(level=_logging_level,
-                                     format=_logging_format)
+# Initialize the logger
+import logging as _logging
+_logging_level = _logging.INFO
+_logging_format = '%(asctime)s - %(funcName)s +%(lineno)s - %(levelname)s - %(message)s'
+_logging.basicConfig(level=_logging_level,
+                     format=_logging_format)
 
-                hw_name = args.accelerator.split(".")[-1]
-                wl_name = re.split(r"/|\.", args.model)[-1]
-                if wl_name == 'onnx':
-                    wl_name = re.split(r"/|\.", args.model)[-2]
-                experiment_id = f"{hw_name}-{wl_name}"
-                pkl_name = f'{experiment_id}-saved_list_of_cmes'
+hw_name = args.accelerator.split(".")[-1]
+wl_name = re.split(r"/|\.", args.model)[-1]
+if wl_name == 'onnx':
+    wl_name = re.split(r"/|\.", args.model)[-2]
+experiment_id = f"{hw_name}-{wl_name}"
+pkl_name = f'{experiment_id}-saved_list_of_cmes'
+optimizer_params = {'iterations':100,
+    'init_iterations':10,
+    'area_budget':1.,
+    'optimizer_type':'bayesian'}
+# Initialize the MainStage which will start execution.
+# The first argument of this init is the list of stages that will be executed in sequence.
+# The second argument of this init are the arguments required for these different stages.
+mainstage = MainStage([  # Initializes the MainStage as entry point
+    NDOStage,
+    ONNXModelParserStage,  # Parses the ONNX Model into the workload
+    AcceleratorParserStage,  # Parses the accelerator
+    PickleSaveStage, # Save CMEs to a pickle file
+    WorkloadStage,  # Iterates through the different layers in the workload
+    MinimalEnergyStage, # Reduces all CMEs, returning minimal EDP one
+    SpatialMappingGeneratorStage,  # Generates multiple spatial mappings (SM)
+    LomaStage,  # Generates multiple temporal mappings (TM)
+    CostModelStage  # Evaluates generated SM and TM through cost model
+],
+    optimizer_params=optimizer_params,
+    accelerator=args.accelerator,  # required by AcceleratorParserStage
+    workload=args.model,  # required by ONNXModelParserStage
+    mapping=args.mapping,  # required by ONNXModelParserStage
+    dump_filename_pattern=f"outputs/{experiment_id}-layer_?.json",  # output file save pattern
+    pickle_filename=f"outputs/{experiment_id}-layer_d1_{d1}_d2_{d2}_m_{m}.pkl",  # output file save pattern
+    loma_lpf_limit=6,  # required by LomaStage
+    loma_show_progress_bar=True,  # shows a progress bar while iterating over temporal mappings
+    enable_mix_spatial_mapping_generation=True,  # True: enable generating mix spatial mapping. False: single layer dim mapping during the autogeneration
+    maximize_hardware_utilization=True,  # True: only keep 2 sm with the highest hardware utilization to speedup simulation time
+    enable_weight_diagonal_mapping=True,  # True: enable OX/OY unrolling when automatically generating sm
+)
 
-                # Initialize the MainStage which will start execution.
-                # The first argument of this init is the list of stages that will be executed in sequence.
-                # The second argument of this init are the arguments required for these different stages.
-                mainstage = MainStage([  # Initializes the MainStage as entry point
-                    ONNXModelParserStage,  # Parses the ONNX Model into the workload
-                    AcceleratorParserStage,  # Parses the accelerator
-                    PickleSaveStage, # Save CMEs to a pickle file
-                    # CompleteSaveStage,  # Saves all received CMEs information to a json
-    #                SearchUnusedMemoryStage, # Detect unnecessary memory instances
-                    WorkloadStage,  # Iterates through the different layers in the workload
-    #                RemoveUnusedMemoryStage, # Remove unnecessary memory instances
-                    MinimalEnergyStage, # Reduces all CMEs, returning minimal EDP one
-                    SpatialMappingGeneratorStage,  # Generates multiple spatial mappings (SM)
-                    LomaStage,  # Generates multiple temporal mappings (TM)
-                    CostModelStage  # Evaluates generated SM and TM through cost model
-                ],
-                    accelerator=accelerator,  # required by AcceleratorParserStage
-                    workload=args.model,  # required by ONNXModelParserStage
-                    mapping=args.mapping,  # required by ONNXModelParserStage
-                    dump_filename_pattern=f"outputs/{experiment_id}-layer_?.json",  # output file save pattern
-                    pickle_filename=f"outputs/{experiment_id}-layer_d1_{d1}_d2_{d2}_m_{m}.pkl",  # output file save pattern
-                    loma_lpf_limit=6,  # required by LomaStage
-                    loma_show_progress_bar=True,  # shows a progress bar while iterating over temporal mappings
-                    enable_mix_spatial_mapping_generation=True,  # True: enable generating mix spatial mapping. False: single layer dim mapping during the autogeneration
-                    maximize_hardware_utilization=False,  # True: only keep 2 sm with the highest hardware utilization to speedup simulation time
-                    enable_weight_diagonal_mapping=True,  # True: enable OX/OY unrolling when automatically generating sm
-                )
-
-                # Launch the MainStage
-                mainstage.run()
+# Launch the MainStage
+aaa = mainstage.run()
+breakpoint()

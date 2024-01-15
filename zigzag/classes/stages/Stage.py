@@ -36,6 +36,14 @@ class Stage:
     def is_leaf(self) -> bool:
         return False
 
+    def find_optimizer_target(self, tid_list, target_object=None):
+        breakpoint()
+        if target_object == None:
+            if tid_list[0].target_type not in ['list','dict']:
+                target_object = next((v for k,v in self.__dict__.items() if k == tid_list[0].target_name), None)
+            breakpoint()
+        breakpoint()
+
 ## Not actually a Stage, as running it does return (not yields!) a list of results instead of a generator
 # Can be used as the main entry point
 class MainStage:

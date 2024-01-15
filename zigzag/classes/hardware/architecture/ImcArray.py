@@ -18,6 +18,9 @@ class ImcArray:
         :param hd_param: hardware architecture parameters except dimensions
         :param dimensions: dimensions definition
         """
+        self.hd_param = hd_param
+        self.tech_param = tech_param
+        
         if hd_param["imc_type"] == "digital":
             self.unit = DimcArrayUnit(tech_param, hd_param, dimensions)
         elif hd_param["imc_type"] == "analog":
@@ -40,6 +43,30 @@ class ImcArray:
         self.imc_type = hd_param["imc_type"]
         self.tops_peak, self.topsw_peak, self.topsmm2_peak = self.unit.get_macro_level_peak_performance()
 
+    def set_array_dim(self, dimensions):
+        if self.hd_param["imc_type"] == "digital":
+            self.unit = DimcArrayUnit(self.tech_param, self.hd_param, dimensions)
+        elif self.hd_param["imc_type"] == "analog":
+            self.unit = AimcArrayUnit(self.tech_param, self.hd_param, dimensions)
+        self.unit.get_area() # update self.area and self.area_breakdown
+        self.unit.get_delay() # update self.delay and self.delay_breakdown
+        self.area_breakdown = self.unit.area_breakdown
+        self.total_area = self.unit.area
+        self.tclk_breakdown = self.unit.delay_breakdown # clock period breakdown
+        self.tclk = self.unit.delay # maximum clock period (unit: ns)
+        base_dims = [
+            Dimension(idx, name, size)
+            for idx, (name, size) in enumerate(dimensions.items())
+        ]
+        self.dimensions = base_dims
+        self.dimension_sizes = [dim.size for dim in base_dims]
+        self.nb_dimensions = len(base_dims)
+        self.total_unit_count = np.prod(list(dimensions.values()))
+        self.pe_type = self.hd_param["pe_type"]
+        self.imc_type = self.hd_param["imc_type"]
+        self.tops_peak, self.topsw_peak, self.topsmm2_peak = self.unit.get_macro_level_peak_performance()
+
+     
     def __jsonrepr__(self):
         """
         JSON Representation of this class to save it to a json file.

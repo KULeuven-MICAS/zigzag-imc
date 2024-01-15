@@ -8,24 +8,44 @@ from zigzag.utils import pickle_deepcopy
 import logging
 logger = logging.getLogger(__name__)
 
+def find_optimizer_target(tid_list, target_object=None):
+    if tid_list == []:
+        return target_object
+    else:
+        if tid_list[0].target_type not in ['list','dict']:
+            new_target_object = next((v for k,v in target_object.__dict__.items() if k == tid_list[0].target_id), None)
+        elif tid_list[0].target_type == 'list':
+            new_target_object = target_object[tid_list[0].target_id]
+        end_target = find_optimizer_target(tid_list[1:],new_target_object)
+        return end_target
+    
+
+
 ## Description missing
 class AcceleratorParserStage(Stage):
     def __init__(self, list_of_callables, *, accelerator, **kwargs):
         super().__init__(list_of_callables, **kwargs)
-        if type(accelerator) == 'str':
-            self.accelerator_parser = AcceleratorParser(accelerator)
-        else:
-            self.accelerator_parser = None
-            self.accelerator_model = accelerator
+        #if type(accelerator) == 'str':
+        self.accelerator_parser = AcceleratorParser(accelerator)
+        #else:
+        #    self.accelerator_parser = None
+        #    self.accelerator_model = accelerator
 
     def run(self):
-        if self.accelerator_parser is not None:
-            self.accelerator_parser.run()
-            accelerator = self.accelerator_parser.get_accelerator()
-        else:
-            accelerator = self.accelerator_model
+        #if self.accelerator_parser is not None:
+        self.accelerator_parser.run()
+        self.accelerator = self.accelerator_parser.get_accelerator()
 
-        sub_stage = self.list_of_callables[0](self.list_of_callables[1:], accelerator=accelerator, **self.kwargs)
+        if 'optimizer_target' in self.kwargs.keys():
+            optimizer_target = self.kwargs['optimizer_target']
+            if type(self).__name__ == optimizer_target.target_stage:
+                tid_list = optimizer_target.target_object
+                target_object = find_optimizer_target(tid_list, self)
+                getattr(target_object, optimizer_target.target_modifier)(optimizer_target.target_parameters)
+        #else:
+        #    accelerator = self.accelerator_model
+
+        sub_stage = self.list_of_callables[0](self.list_of_callables[1:], accelerator=self.accelerator, **self.kwargs)
         for cme, extra_info in sub_stage.run():
             yield cme, extra_info
 
