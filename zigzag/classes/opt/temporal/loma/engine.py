@@ -62,13 +62,13 @@ class LomaEngine:
             core_id
         ).memory_hierarchy
 
-        self.show_progress_bar = kwargs.get("loma_show_progress_bar", False)
+        self.show_progress_bar = False#kwargs.get("loma_show_progress_bar", False)
 
     ## Runs the LomaEngine
     # @return Generator that yields all temporal mappings
     def run(self):
         # TODO: add the criterion(s) as inputs to this function.
-        logger.info("Running temporal mapping search engine...")
+        #logger.info("Running temporal mapping search engine...")
 
         self.get_temporal_loops()  # get all the temporal loops
         self.get_prime_factors()  # convert these to LPFs (loop prime factors)

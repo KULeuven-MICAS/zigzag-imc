@@ -145,6 +145,6 @@ class PickleSaveStage(Stage):
             os.makedirs(dirname)
         with open(self.pickle_filename, "wb") as handle:
             pickle.dump(all_cmes, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        logger.info(
-            f"Saved pickled list of {len(all_cmes)} CMEs to {self.pickle_filename}."
-        )
+        #logger.info(
+        #    f"Saved pickled list of {len(all_cmes)} CMEs to {self.pickle_filename}."
+        #)

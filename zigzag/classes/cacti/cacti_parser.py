@@ -148,9 +148,9 @@ class CactiParser:
         if not os.path.exists(cacti_top_path):
             raise FileNotFoundError(f"Cacti top file doesn't exist: {cacti_top_path}.")
 
-        logger.info(
-            f"Extracting memory costs with CACTI for size = {size} and r_bw = {r_bw}."
-        )
+        #logger.info(
+        #    f"Extracting memory costs with CACTI for size = {size} and r_bw = {r_bw}."
+        #)
 
         if mem_type == "rf":
             new_mem_type = "sram"

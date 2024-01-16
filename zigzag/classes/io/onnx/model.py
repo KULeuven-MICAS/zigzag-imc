@@ -108,9 +108,9 @@ class ONNXModelParser:
             # Add the node_obj to the ONNXWorkload
             workload.add(node_id, node_obj)
 
-        logger.info(
-            f"Created ONNXWorkload graph with {workload.number_of_nodes()} nodes and {workload.number_of_edges()} edges."
-        )
+        #logger.info(
+        #    f"Created ONNXWorkload graph with {workload.number_of_nodes()} nodes and {workload.number_of_edges()} edges."
+        #)
 
         return workload
 

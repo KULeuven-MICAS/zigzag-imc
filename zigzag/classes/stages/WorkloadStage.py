@@ -29,7 +29,7 @@ class WorkloadStage(Stage):
                 layer_name = layer.name
             else:
                 layer_name = id
-            logger.info(f"Processing layer {layer_name}...")
+            #logger.info(f"Processing layer {layer_name}...")
             sub_stage = self.list_of_callables[0](self.list_of_callables[1:], **kwargs)
             for cme, extra_info in sub_stage.run():
                 yield cme, (layer, extra_info)

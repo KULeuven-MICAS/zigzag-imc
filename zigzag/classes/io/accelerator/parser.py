@@ -49,7 +49,7 @@ class AcceleratorParser:
         global module
         module = importlib.import_module(accelerator_path)
         accelerator = module.accelerator
-        logger.info(f"Parsed accelerator with cores {[core.id for core in accelerator.cores]}.")
+        #logger.info(f"Parsed accelerator with cores {[core.id for core in accelerator.cores]}.")
         return accelerator
 
     def parse_supported_accelerator(self, standard_accelerator):

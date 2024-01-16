@@ -263,8 +263,8 @@ class DimcArrayUnit(ImcUnit):
         topsmm2_peak = tops_peak / imc_area
 
         logger = _logging.getLogger(__name__)
-        logger.info(f"Current macro-level peak performance:")
-        logger.info(f"TOP/s: {tops_peak}, TOP/s/W: {topsw_peak}, TOP/s/mm^2: {topsmm2_peak}")
+        #logger.info(f"Current macro-level peak performance:")
+        #logger.info(f"TOP/s: {tops_peak}, TOP/s/W: {topsw_peak}, TOP/s/mm^2: {topsmm2_peak}")
 
         return tops_peak, topsw_peak, topsmm2_peak
 
@@ -693,10 +693,10 @@ if __name__ == "__main__":
     dimc = DimcArrayUnit(tech_param_28nm, hd_param, dimensions)
     dimc.get_area()
     dimc.get_delay()
-    logger = _logging.getLogger(__name__)
-    logger.info(f"Total IMC area (mm^2): {dimc.area}")
-    logger.info(f"area breakdown: {dimc.area_breakdown}")
-    logger.info(f"delay (ns): {dimc.delay}")
-    logger.info(f"delay breakdown (ns): {dimc.delay_breakdown}")
+    #logger = _logging.getLogger(__name__)
+    #logger.info(f"Total IMC area (mm^2): {dimc.area}")
+    #logger.info(f"area breakdown: {dimc.area_breakdown}")
+    #logger.info(f"delay (ns): {dimc.delay}")
+    #logger.info(f"delay breakdown (ns): {dimc.delay_breakdown}")
     dimc.get_macro_level_peak_performance()
     exit()

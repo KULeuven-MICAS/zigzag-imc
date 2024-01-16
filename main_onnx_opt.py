@@ -289,16 +289,25 @@ _logging_format = '%(asctime)s - %(funcName)s +%(lineno)s - %(levelname)s - %(me
 _logging.basicConfig(level=_logging_level,
                      format=_logging_format)
 
+
 hw_name = args.accelerator.split(".")[-1]
 wl_name = re.split(r"/|\.", args.model)[-1]
 if wl_name == 'onnx':
     wl_name = re.split(r"/|\.", args.model)[-2]
 experiment_id = f"{hw_name}-{wl_name}"
 pkl_name = f'{experiment_id}-saved_list_of_cmes'
+
 optimizer_params = {'iterations':100,
     'init_iterations':10,
     'area_budget':1.,
-    'optimizer_type':'bayesian'}
+    'optimizer_type':'bayesian_optimization'}
+
+optimizer_params = {'iterations':100,
+    'init_temperature':1.,
+    'end_temperature':0.1,
+    'cooling_factor':0.95,
+    'area_budget':1.,
+    'optimizer_type':'simulated_annealing'}
 # Initialize the MainStage which will start execution.
 # The first argument of this init is the list of stages that will be executed in sequence.
 # The second argument of this init are the arguments required for these different stages.

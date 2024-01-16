@@ -107,6 +107,6 @@ class MatMulParser(Parser):
             type=self.node.op_type.lower(),
         )
 
-        logger.info(f"Parsed MatMul node {self.node.name}")
+        #logger.info(f"Parsed MatMul node {self.node.name}")
 
         return node_obj

@@ -67,8 +67,8 @@ def parse_workload_from_path_or_from_module(workload, mapping):
     # make a copy here to prevent later it is being changed in the following stages
     workload_copy = pickle_deepcopy(workload)
     workload = DNNWorkload(workload_copy, mapping)
-    logger.info(
-        f"Created workload graph with {workload.number_of_nodes()} nodes and {workload.number_of_edges()} edges.")
+    #logger.info(
+    #    f"Created workload graph with {workload.number_of_nodes()} nodes and {workload.number_of_edges()} edges.")
 
     return workload
 

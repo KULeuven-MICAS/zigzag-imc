@@ -124,9 +124,9 @@ class SpatialMappingGeneratorStage(Stage):
         nb_user_spatial_mappings = len(user_spatial_mappings)
 
         for i, user_spatial_mapping in enumerate(user_spatial_mappings):
-            logger.info(
-                f"Launching spatial mapping {i+1}/{nb_user_spatial_mappings}: {user_spatial_mapping}."
-            )
+            #logger.info(
+            #    f"Launching spatial mapping {i+1}/{nb_user_spatial_mappings}: {user_spatial_mapping}."
+            #)
             # Set the user_spatial_mapping in the layer, as this is required by SpatialMappingConversionStage
             self.layer.user_spatial_mapping = user_spatial_mapping
             # Note: manual instantiation of spatial mapping conversion stage here. We let that class deal with
@@ -164,9 +164,9 @@ class SpatialMappingGeneratorStage(Stage):
         # or complete it if it is provided but on only part of oa dimensions.
         complete_user_spatial_mapping_hint = user_spatial_mapping_hint
         if complete_user_spatial_mapping_hint is None:
-            logger.info(
-                "User-provided spatial mappings hint not found. Auto-generating spatial_mapping_hint.."
-            )
+            #logger.info(
+            #    "User-provided spatial mappings hint not found. Auto-generating spatial_mapping_hint.."
+            #)
             complete_user_spatial_mapping_hint = {}
             for oa_dim in oa_dims:
                 complete_user_spatial_mapping_hint[oa_dim.name] = [
