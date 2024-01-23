@@ -15,9 +15,8 @@ logger = logging.getLogger(__name__)
 
 class BayesianOptimizer(BlackBoxOptimizer):
     def __init__(self, optimizer_params):
-        x = np.linspace(32,256,256-32+1)
-        self.input_range = np.dstack(np.meshgrid(x,x)).reshape(-1,2)
-        #x = np.arange(32,512+1,16)
+        self.opt_targets = optimizer_params['optimizer_targets']
+        self.input_range = np.array([np.array(x) for x in itertools.product(*[t.target_range for t in self.opt_targets])])
         self.input_samples = []
         self.output_samples = []
         self.best_cost = -float('inf')
@@ -36,22 +35,19 @@ class BayesianOptimizer(BlackBoxOptimizer):
     def sample(self, ei=None, init=False):
         while(1):
             if init:
-                dims = np.random.randint(32, 256, size=2)
-                #dims = np.random.choice(np.arange(32,512+1,16),size=2)
+                dims = np.random.choice(self.input_range)
             else:
                 dims = self.input_range[np.argmax(ei)]
             dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':1}
-            group_depth = 1
-            imc_array = imc_array_dut(dimensions, group_depth)
-            if imc_array.total_area <= self.optimizer_params['area_budget']:
+            sample_correct = self.check_sample_correctness(dimensions)
+            if sample_correct:
                 ba_mask = []
                 for ii_xx, xx in enumerate(self.input_range):
                     if xx[0] == dims[0] and xx[1] == dims[1]:
                         ba_mask.append(ii_xx)
                 self.input_range = np.delete(self.input_range, ba_mask, axis=0)
                 if not init:
-                    ei = np.delete(ei, ba_mask, axis=0)
-
+                    self.ei = np.delete(self.ei, ba_mask, axis=0)
                 break
             else:
                 if not init:
@@ -61,15 +57,21 @@ class BayesianOptimizer(BlackBoxOptimizer):
                         if xx[0] >= dims[0] and xx[1] >= dims[1]:
                             ba_mask.append(ii_xx)
                     self.input_range = np.delete(self.input_range, ba_mask, axis=0)
-                    ei = np.delete(ei, ba_mask, axis=0)
+                    self.ei = np.delete(self.ei, ba_mask, axis=0)
 
         self.input_samples.append(dims)
-        optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
-                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
-                target_modifier = 'set_array_dim',
-                target_parameters = dimensions)
-        return optimizer_target
+        for ii_ot, optimizer_target in enumerate(self.optimizer_targets):
+            optimizer_target.target_parameters = dims[ii_ot]
 
+    
+    def check_sample_correctness(self, dimensions):
+        group_depth = 1
+        imc_array = imc_array_dut(dimensions, group_depth)
+        if imc_array.total_area <= self.optimizer_params['area_budget']:
+            return True
+        else:
+            return False
+            
     def init_optimizer(self):
         for i in range(self.optimizer_params['init_iterations']):
             optimizer_target = self.sample(init=True)

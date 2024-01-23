@@ -4,21 +4,12 @@ from zigzag.classes.io.accelerator.parser import AcceleratorParser
 from zigzag.classes.stages.Stage import Stage
 from zigzag.classes.workload.dnn_workload import DNNWorkload
 from zigzag.utils import pickle_deepcopy
+from zigzag.opt.NDO.black_box_optimizer import find_optimizer_target
 
 import logging
 logger = logging.getLogger(__name__)
 
-def find_optimizer_target(tid_list, target_object=None):
-    if tid_list == []:
-        return target_object
-    else:
-        if tid_list[0].target_type not in ['list','dict']:
-            new_target_object = next((v for k,v in target_object.__dict__.items() if k == tid_list[0].target_id), None)
-        elif tid_list[0].target_type == 'list':
-            new_target_object = target_object[tid_list[0].target_id]
-        end_target = find_optimizer_target(tid_list[1:],new_target_object)
-        return end_target
-    
+   
 
 
 ## Description missing
@@ -36,12 +27,13 @@ class AcceleratorParserStage(Stage):
         self.accelerator_parser.run()
         self.accelerator = self.accelerator_parser.get_accelerator()
 
-        if 'optimizer_target' in self.kwargs.keys():
-            optimizer_target = self.kwargs['optimizer_target']
-            if type(self).__name__ == optimizer_target.target_stage:
-                tid_list = optimizer_target.target_object
-                target_object = find_optimizer_target(tid_list, self)
-                getattr(target_object, optimizer_target.target_modifier)(optimizer_target.target_parameters)
+        if 'optimizer_targets' in self.kwargs.keys():
+            optimizer_targets = self.kwargs['optimizer_targets']
+            for optimizer_target in optimizer_targets:
+                if type(self).__name__ == optimizer_target.target_stage:
+                    tid_list = optimizer_target.target_object
+                    target_object = find_optimizer_target(tid_list, self)
+                    getattr(target_object, optimizer_target.target_modifier)(optimizer_target.target_parameters)
         #else:
         #    accelerator = self.accelerator_model
 
