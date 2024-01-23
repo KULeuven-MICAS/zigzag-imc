@@ -60,7 +60,7 @@ class DimcArrayUnit(ImcUnit):
         tech_node = self.logic_unit.tech_param["tech_node"]
         group_depth = self.hd_param["group_depth"]
         w_pres = self.hd_param["weight_precision"]
-        if self.hd_param["enable_cacti"] == True:
+        if False:#self.hd_param["enable_cacti"] == True:
             single_cell_array_area = self.get_single_cell_array_cost_from_cacti(tech_node,
                                                                                 self.wl_dim_size,
                                                                                 self.bl_dim_size,
@@ -70,8 +70,8 @@ class DimcArrayUnit(ImcUnit):
             area_cells = single_cell_array_area * self.nb_of_banks # total cell array area in the core
         else:
             # TODO: [jiacong] [TO BE SUPPORTED OR YOU CAN MODIFY YOURSELF]
-            area_cells = None  # user-provided cell array area (from somewhere?)
-            raise Exception(f"User-provided cell area is not supported yet.")
+            area_cells = 3e-6 #None  # user-provided cell array area (from somewhere?)
+            #raise Exception(f"User-provided cell area is not supported yet.")
 
         """area of multiplier array"""
         area_mults = self.logic_unit.get_1b_multiplier_area() * self.hd_param["input_bit_per_cycle"] * \

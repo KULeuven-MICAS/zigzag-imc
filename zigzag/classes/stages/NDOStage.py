@@ -34,6 +34,44 @@ class NDOStage(Stage):
         
     def run(self) -> Generator:
 
+        # Grid search
+        if self.optimizer_params['optimizer_type'] == 'grid_search':
+            x = np.arange(32,257,16)
+            self.gs_input_samples = []
+            self.gs_output_samples = []
+            dim_combs = np.dstack(np.meshgrid(x,x)).reshape(-1,2)
+            self.gs_best_cost = float('inf')
+            for dims in dim_combs:
+                dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':1}
+                group_depth = 1
+                imc_array = self.imc_array_dut(dimensions, group_depth)
+                if imc_array.total_area > self.optimizer_params['area_budget']:
+                    continue
+                self.gs_input_samples.append(dims)
+                print(f'Grid search array dimension: {dims}')
+                optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                        target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
+                        target_modifier = 'set_array_dim',
+                        target_parameters = dimensions)
+                self.kwargs['optimizer_target'] = optimizer_target 
+                sub_stage = self.list_of_callables[0](self.list_of_callables[1:],**self.kwargs)
+                cme_list = []
+                for cme, extra_info in sub_stage.run():
+                    cme_list.append(cme)
+                    yield cme, extra_info
+                cost = - self.get_cost(cme_list)
+                if cost < self.gs_best_cost:
+                    self.gs_best_cost = cost
+                    cprint(f'Cost {cost:6.2e} Best cost {self.gs_best_cost:.2e}','green')
+                else:
+                    cprint(f'Cost {cost:6.2e} Best cost {self.gs_best_cost:.2e}','yellow')
+                self.gs_output_samples.append(cost)
+            import pickle
+            with open('gs_data.pkl','wb') as infile:
+                pickle.dump([self.gs_input_samples, self.gs_output_samples], infile)
+
+            breakpoint() 
+
 
         # Simulated annealing
         if self.optimizer_params['optimizer_type'] == 'simulated_annealing':
@@ -78,8 +116,8 @@ class NDOStage(Stage):
                     current_dim = [optimizer_target.target_parameters['D1'], optimizer_target.target_parameters['D2']]
                 else:
                     r = np.random.random()
-                    cprint(f'Accept? {r:.2e} < {np.exp(- np.log(delta_cost)/10 / self.sa_temp):.2e}','yellow')
-                    if r < np.exp(- np.log(delta_cost)/10 / self.sa_temp):
+                    cprint(f'Accept? {r:.2e} < {np.exp(- np.log(delta_cost)/50 / self.sa_temp):.2e}','yellow')
+                    if r < np.exp(- np.log(delta_cost)/50 / self.sa_temp):
                         #accept
                         cprint('Accepted','green')
                         self.sa_best_cost = new_cost
@@ -88,6 +126,10 @@ class NDOStage(Stage):
                         # not accept
                         cprint('Refused','red')
                         pass
+                import pickle
+                with open('sa_data.pkl','wb') as infile:
+                    pickle.dump([self.sa_input_samples, self.sa_output_samples], infile)
+
 
                 print()
                 # update temperature
@@ -101,10 +143,12 @@ class NDOStage(Stage):
             
         # Bayesian optimization
         if self.optimizer_params['optimizer_type'] == 'bayesian_optimization':
+            x = np.linspace(32,256,256-32+1)
+            #x = np.arange(32,512+1,16)
             self.bo_input_samples = []
             self.bo_output_samples = np.array([])
             self.bo_input_range = np.dstack(np.meshgrid(x,x)).reshape(-1,2)
-
+            best_cost = -float('inf')
             # Initialize surrogate model with set of samples
             for i in range(self.optimizer_params['init_iterations']):
                 optimizer_target = self.bo_sample_parameter(init=True)
@@ -123,6 +167,7 @@ class NDOStage(Stage):
             ei = self.bo_acquisition_function()
             for i in range(self.optimizer_params['iterations']):
                 optimizer_target = self.bo_sample_parameter(ei=ei) 
+                print(f'BO search array dimension: {[optimizer_target.target_parameters["D1"], optimizer_target.target_parameters["D2"]]}')
                 self.kwargs['optimizer_target'] = optimizer_target 
                 sub_stage = self.list_of_callables[0](self.list_of_callables[1:],**self.kwargs)
                 cme_list = []
@@ -130,24 +175,147 @@ class NDOStage(Stage):
                     cme_list.append(cme)
                     yield cme, extra_info
                 cost = self.get_cost(cme_list)
+                if cost > best_cost:
+                    best_cost = cost
+                    cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','green')
+                else:
+                    cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','yellow')
                 self.bo_output_samples = np.append(self.bo_output_samples, cost)
                 ei = self.bo_acquisition_function()
 
             best_parameters = self.bo_get_best_point()
-            print(self.bo_output_samples)
-            print(best_parameters)
+            import pickle
+            with open('bo_data.pkl','wb') as infile:
+                pickle.dump([self.bo_input_samples, self.bo_output_samples], infile)
             breakpoint()
+
+        if self.optimizer_params['optimizer_type'] == 'particle_swarm_optimization':
+            # init particles in grid like fashion
+            x = np.arange(32,(32+64*4)+1,64)
+            self.pso_input_samples = []
+            self.pso_output_samples = []
+            self.pso_pbest_val = []
+            self.pso_X = np.dstack(np.meshgrid(x,x)).astype(int).reshape(-1,2)
+            best_cost = -float('inf')
+            for x in self.pso_X:
+                dimensions = {'D1':int(x[0]),'D2':int(x[1]),'D3':1}
+                group_depth = 1
+                imc_array = self.imc_array_dut(dimensions, group_depth)
+                if imc_array.total_area <= self.optimizer_params['area_budget']:
+                    continue
+                self.pso_input_samples.append(x)
+                optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                        target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
+                        target_modifier = 'set_array_dim',
+                        target_parameters = dimensions)
+                print(f'PSO search array dimension: {[optimizer_target.target_parameters["D1"], optimizer_target.target_parameters["D2"]]}')
+                self.kwargs['optimizer_target'] = optimizer_target 
+                sub_stage = self.list_of_callables[0](self.list_of_callables[1:],**self.kwargs)
+                cme_list = []
+                for cme, extra_info in sub_stage.run():
+                    cme_list.append(cme)
+                    yield cme, extra_info
+                cost = self.get_cost(cme_list)
+                if cost > best_cost:
+                    best_cost = cost
+                    cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','green')
+                else:
+                    cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','yellow')
+                self.pso_pbest_val.append(cost)
+            
+            self.pso_X = np.array(self.pso_input_samples)
+            self.pso_pbest = np.copy(self.pso_X)
+            self.pso_pbest_val = np.array(self.pso_pbest_val)
+            self.pso_gbest_val = best_cost
+            self.pso_gbest_pos = self.pso_X[np.argmin(self.pso_pbest_val)]
+            self.pso_V = np.dstack(np.random.randn(2, len(self.pso_X)) * 0.1).reshape(-1,2)
+
+
+            c1 = c2 = 0.002
+            w = 0.008
+            # init initial velocity of each particle
+            # iteration loop
+            for i in range(self.optimizer_params['iterations']):
+                # compute new position of each particle
+                unfit_dims = []
+                r = np.random.rand(2)
+                if i == 0:
+                    self.pso_V = w * self.pso_V + c1*r[0]*(self.pso_pbest - self.pso_X) 
+                else:
+                    self.pso_V = w * self.pso_V + c1*r[0]*(self.pso_pbest - self.pso_X) + c2*r[1]*(self.pso_gbest_pos - self.pso_X)
+
+                for ii_x, x in enumerate(self.pso_X):
+                    new_x = x + self.pso_V[ii_x]
+                    dimensions = {'D1':int(new_x[0]),'D2':int(new_x[1]),'D3':1}
+                    group_depth = 1
+                    imc_array = self.imc_array_dut(dimensions, group_depth)
+                    print(new_x, dimensions, imc_array.total_area)
+                    if imc_array.total_area > self.optimizer_params['area_budget']:
+                        cprint('Above budget','red')
+                        self.pso_X[ii_x] = x
+                        continue
+                    self.pso_X[ii_x] = new_x
+                    optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                            target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
+                            target_modifier = 'set_array_dim',
+                            target_parameters = dimensions)
+                    print(f'PSO search array dimension: {[optimizer_target.target_parameters["D1"], optimizer_target.target_parameters["D2"]]}')
+                    self.kwargs['optimizer_target'] = optimizer_target 
+                    sub_stage = self.list_of_callables[0](self.list_of_callables[1:],**self.kwargs)
+                    cme_list = []
+                    for cme, extra_info in sub_stage.run():
+                        cme_list.append(cme)
+                        yield cme, extra_info
+                    cost = self.get_cost(cme_list)
+                    if cost > self.pso_gbest_val:
+                        self.pso_gbest_val = cost
+                        cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','green')
+                    else:
+                        cprint(f'Cost {cost:6.2e} Best cost {best_cost:6.2e}','yellow')
+
+                    if cost > self.pso_pbest_val[ii_x]:
+                        self.pso_pbest[ii_x] = new_x
+                        self.pso_pbest_value[ii_x] = cost
+
+
+
+    def pso_sample_parameter(self, init=False, x=None):
+        while(1):
+            if init:
+                dims = np.random.choice(np.arange(32,512+1,32), size=2)
+            else:
+                while(1):
+                    dims = [x for x in current_dim]
+                    dims[0] = current_dim[0] + int( np.random.normal(scale=self.sa_temp)*512 )
+                    dims[1] = current_dim[1] + int( np.random.normal(scale=self.sa_temp)*512 )
+                    if dims[0] > 0 and dims[1] > 0:
+                        break
+
+            dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':1}
+            group_depth = 1
+            imc_array = self.imc_array_dut(dimensions, group_depth)
+            if imc_array.total_area <= self.optimizer_params['area_budget']:
+                break
+
+        self.sa_input_samples.append(dims)
+        print(f'Sampled array dimension: {dims}')
+        optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
+                target_modifier = 'set_array_dim',
+                target_parameters = dimensions)
+        return optimizer_target
+
 
 
     def sa_sample_parameter(self, init=False, current_dim=None):
         while(1):
             if init:
-                dims = np.random.randint(32, 256, size=2)
+                dims = np.random.choice(np.arange(32, 257,16), size=2)
             else:
                 while(1):
                     dims = [x for x in current_dim]
-                    dims[0] = current_dim[0] + int( np.random.normal(scale=self.sa_temp)*256 )
-                    dims[1] = current_dim[1] + int( np.random.normal(scale=self.sa_temp)*256 )
+                    dims[0] = current_dim[0] + int( np.random.normal(scale=self.sa_temp)*32 )
+                    dims[1] = current_dim[1] + int( np.random.normal(scale=self.sa_temp)*32 )
                     if dims[0] > 0 and dims[1] > 0:
                         break
 
@@ -170,21 +338,33 @@ class NDOStage(Stage):
         while(1):
             if init:
                 dims = np.random.randint(32, 256, size=2)
+                #dims = np.random.choice(np.arange(32,512+1,16),size=2)
             else:
                 dims = self.bo_input_range[np.argmax(ei)]
             dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':1}
             group_depth = 1
             imc_array = self.imc_array_dut(dimensions, group_depth)
-            print(dims, imc_array.total_area)
             if imc_array.total_area <= self.optimizer_params['area_budget']:
+                ba_mask = []
+                for ii_xx, xx in enumerate(self.bo_input_range):
+                    if xx[0] == dims[0] and xx[1] == dims[1]:
+                        ba_mask.append(ii_xx)
+                self.bo_input_range = np.delete(self.bo_input_range, ba_mask, axis=0)
+                if not init:
+                    ei = np.delete(ei, ba_mask, axis=0)
+
                 break
             else:
                 if not init:
-                    self.bo_input_range = np.delete(self.bo_input_range, np.where(self.bo_input_range==dims))
-                    ei = np.delete(ei, np.where(ei==np.amax(ei)))
+                    ba_mask = []
+                    print(f'Unfit dims {dimensions}')
+                    for ii_xx, xx in enumerate(self.bo_input_range):
+                        if xx[0] >= dims[0] and xx[1] >= dims[1]:
+                            ba_mask.append(ii_xx)
+                    self.bo_input_range = np.delete(self.bo_input_range, ba_mask, axis=0)
+                    ei = np.delete(ei, ba_mask, axis=0)
 
         self.bo_input_samples.append(dims)
-        print(dims)
         optimizer_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
                 target_modifier = 'set_array_dim',

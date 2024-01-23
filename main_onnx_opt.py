@@ -298,21 +298,36 @@ experiment_id = f"{hw_name}-{wl_name}"
 pkl_name = f'{experiment_id}-saved_list_of_cmes'
 
 optimizer_params = {'iterations':100,
-    'init_iterations':10,
+    'init_temperature':1.,
+    'end_temperature':0.1,
+    'cooling_factor':0.95,
+    'area_budget':1.,
+    'optimizer_type':'simulated_annealing'}
+optimizer_params = {'area_budget':1.,
+    'optimizer_type':'grid_search'}
+optimizer_params = {'iterations':100,
+    'init_iterations':20,
     'area_budget':1.,
     'optimizer_type':'bayesian_optimization'}
 
 optimizer_params = {'iterations':100,
     'init_temperature':1.,
     'end_temperature':0.1,
-    'cooling_factor':0.95,
+    'cooling_factor':0.9,
     'area_budget':1.,
     'optimizer_type':'simulated_annealing'}
+#optimizer_params = {'iterations':10,
+#    'area_budget':1.,
+#    'optimizer_type':'particle_swarm_optimization'}
+
+
+
 # Initialize the MainStage which will start execution.
 # The first argument of this init is the list of stages that will be executed in sequence.
 # The second argument of this init are the arguments required for these different stages.
 mainstage = MainStage([  # Initializes the MainStage as entry point
-    NDOStage,
+    GDStage,
+    #NDOStage,
     ONNXModelParserStage,  # Parses the ONNX Model into the workload
     AcceleratorParserStage,  # Parses the accelerator
     PickleSaveStage, # Save CMEs to a pickle file

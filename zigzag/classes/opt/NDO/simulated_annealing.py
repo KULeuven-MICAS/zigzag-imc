@@ -1,7 +1,8 @@
 import numpy as np
 
 class SimulatedAnnealingOptimizer():
-    def __init__(self, init_temperature, cooling_factor, iterations, input_parameters):
+    def __init__(self, init_temperature, cooling_factor, iterations, input_parameters,
+            sub_stage_list, sub_stage_kwargs):
         self.temp = init_temperature
         self.alfa = cooling_factor
         self.iterations = iterations

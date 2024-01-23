@@ -20,7 +20,6 @@ class ImcArray:
         """
         self.hd_param = hd_param
         self.tech_param = tech_param
-        
         if hd_param["imc_type"] == "digital":
             self.unit = DimcArrayUnit(tech_param, hd_param, dimensions)
         elif hd_param["imc_type"] == "analog":
