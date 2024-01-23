@@ -1,6 +1,7 @@
 from .CostModelStage import CostModelStage
 from .DumpStage import DumpStage
 from .NDOStage import NDOStage
+from .BBOStage import BBOStage
 from .GDStage import GDStage
 from .SearchUnusedMemoryStage import SearchUnusedMemoryStage
 from .RemoveUnusedMemoryStage import RemoveUnusedMemoryStage

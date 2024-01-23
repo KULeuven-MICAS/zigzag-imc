@@ -42,11 +42,14 @@ class ImcArray:
         self.imc_type = hd_param["imc_type"]
         self.tops_peak, self.topsw_peak, self.topsmm2_peak = self.unit.get_macro_level_peak_performance()
 
-    def set_array_dim(self, dimensions):
+    def reset_array_dim(self):
+        dim_dict = {}
+        for d in self.dimensions:
+            dim_dict[d.name] = d.size
         if self.hd_param["imc_type"] == "digital":
-            self.unit = DimcArrayUnit(self.tech_param, self.hd_param, dimensions)
+            self.unit = DimcArrayUnit(self.tech_param, self.hd_param, dim_dict)
         elif self.hd_param["imc_type"] == "analog":
-            self.unit = AimcArrayUnit(self.tech_param, self.hd_param, dimensions)
+            self.unit = AimcArrayUnit(self.tech_param, self.hd_param, dim_dict)
         self.unit.get_area() # update self.area and self.area_breakdown
         self.unit.get_delay() # update self.delay and self.delay_breakdown
         self.area_breakdown = self.unit.area_breakdown
@@ -55,12 +58,12 @@ class ImcArray:
         self.tclk = self.unit.delay # maximum clock period (unit: ns)
         base_dims = [
             Dimension(idx, name, size)
-            for idx, (name, size) in enumerate(dimensions.items())
+            for idx, (name, size) in enumerate(dim_dict.items())
         ]
         self.dimensions = base_dims
         self.dimension_sizes = [dim.size for dim in base_dims]
         self.nb_dimensions = len(base_dims)
-        self.total_unit_count = np.prod(list(dimensions.values()))
+        self.total_unit_count = np.prod(list(dim_dict.values()))
         self.pe_type = self.hd_param["pe_type"]
         self.imc_type = self.hd_param["imc_type"]
         self.tops_peak, self.topsw_peak, self.topsmm2_peak = self.unit.get_macro_level_peak_performance()

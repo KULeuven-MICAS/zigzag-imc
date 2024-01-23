@@ -27,3 +27,6 @@ class Dimension:
 
     def __hash__(self):
         return hash(self.id) ^ hash(self.name)
+
+    def set_array_dim(self, parameter):
+        self.size = parameter

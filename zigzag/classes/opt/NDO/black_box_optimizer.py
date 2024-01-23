@@ -4,7 +4,7 @@ class tID():
         self.target_id = target_id
 
 class OptimizerTarget():
-    def __init__(self, target_stage, target_object, target_modifier, target_range, target_parameters: None):
+    def __init__(self, target_stage, target_object, target_modifier, target_range, target_parameters= None):
         self.target_stage = target_stage
         self.target_object = target_object
         self.target_modifier = target_modifier
@@ -24,7 +24,6 @@ def find_optimizer_target(tid_list, target_object=None):
  
 class BlackBoxOptimizer():
     def __init__(self):
-        self.targets = []
         pass
 
     def init_optimizer(self):
@@ -38,4 +37,6 @@ class BlackBoxOptimizer():
 
     def update_optimizer(self):
         raise NotImplementedError()
-
+    
+    def runner(self):
+        raise NotImplementedError()

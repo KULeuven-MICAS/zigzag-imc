@@ -4,7 +4,7 @@ from zigzag.classes.io.accelerator.parser import AcceleratorParser
 from zigzag.classes.stages.Stage import Stage
 from zigzag.classes.workload.dnn_workload import DNNWorkload
 from zigzag.utils import pickle_deepcopy
-from zigzag.opt.NDO.black_box_optimizer import find_optimizer_target
+from zigzag.classes.opt.NDO.black_box_optimizer import find_optimizer_target
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,6 +34,8 @@ class AcceleratorParserStage(Stage):
                     tid_list = optimizer_target.target_object
                     target_object = find_optimizer_target(tid_list, self)
                     getattr(target_object, optimizer_target.target_modifier)(optimizer_target.target_parameters)
+            # major semplification because the IMC code integration was not made for this kind of optimization
+            self.accelerator.cores[0].operational_array.reset_array_dim()
         #else:
         #    accelerator = self.accelerator_model
 

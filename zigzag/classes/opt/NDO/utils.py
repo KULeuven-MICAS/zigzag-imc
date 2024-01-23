@@ -1,4 +1,5 @@
 from zigzag.classes.hardware.architecture.ImcArray import ImcArray
+import numpy as np
 
 def imc_array_dut(dimensions, group_depth):
 

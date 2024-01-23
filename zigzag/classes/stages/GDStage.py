@@ -14,18 +14,6 @@ from termcolor import cprint
 
 logger = logging.getLogger(__name__)
 
-class tID():
-    def __init__(self, target_type, target_id):
-        self.target_type = target_type
-        self.target_id = target_id
-
-class OptimizerTarget():
-    def __init__(self, target_stage, target_object, target_modifier, target_parameters):
-        self.target_stage = target_stage
-        self.target_object = target_object
-        self.target_modifier = target_modifier
-        self.target_parameters = target_parameters
-
 # Non-Differentiable Optimizer stage
 class GDStage(Stage):
     def __init__(self, list_of_callables, *, optimizer_params, **kwargs):
