@@ -172,8 +172,8 @@ class MultiProcessingGatherStage(Stage):
             for ans in self.queue.get(block=True):
                 yield ans
             count += 1
-            if count % (count_to_get // 10) == 0:
-                logger.info(
-                    f"Multiprocessing results received: {count} of {count_to_get}"
-                )
+            #if count % (count_to_get // 10) == 0:
+                #logger.info(
+                #    f"Multiprocessing results received: {count} of {count_to_get}"
+                #)
         close_threadpool()

@@ -42,6 +42,9 @@ class ImcArray:
         self.imc_type = hd_param["imc_type"]
         self.tops_peak, self.topsw_peak, self.topsmm2_peak = self.unit.get_macro_level_peak_performance()
 
+    def set_group_depth(self, parameter):
+        self.hd_param['group_depth'] = int(parameter)
+
     def reset_array_dim(self):
         dim_dict = {}
         for d in self.dimensions:

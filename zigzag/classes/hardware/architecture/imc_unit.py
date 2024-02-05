@@ -36,6 +36,9 @@ class LogicUnit:
         self.tech_param["bl_cap"] = tech_param["nd2_cap"]/2  # bitline cap of each SRAM cell is treated as NAND2_cap/2
         self.group_depth = group_depth
 
+    def set_group_depth(self, parameter):
+        self.group_depth = parameter
+
     def check_tech_param(self, tech_param):
         required_param = ["tech_node", "vdd", "nd2_cap", "nd2_area", "nd2_dly", "xor2_cap", "xor2_area", "xor2_dly", "dff_cap", "dff_area"]
         for ii_a, a in enumerate(required_param):
@@ -87,7 +90,7 @@ class LogicUnit:
         k3 = 0.00653 # ns
         k4 = 0.640 # ns
 
-        return (k3*self.group_depth + k4) # unit: ns
+        return (k3*self.group_depth)  # unit: ns
 
     def get_1b_adder_dly_in2sum(self):
         """delay of 1b adder: input to sum-out"""

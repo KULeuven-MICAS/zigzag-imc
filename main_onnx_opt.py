@@ -8,12 +8,20 @@ import numpy as np
 
 d1_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',0)],
-                target_modifier = 'set_array_dim', target_range = np.arange(32,256+1,16))
+                target_modifier = 'set_array_dim', target_range = np.array([32, 64, 128, 256]))
 d2_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
-                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',0)],
-                target_modifier = 'set_array_dim', target_range = np.arange(32,256+1,16))
+                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',1)],
+                target_modifier = 'set_array_dim', target_range = np.array([32,36,48,64,72,96,128,144,192,256]))
+d3_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',2)],
+                target_modifier = 'set_array_dim', target_range = np.array([1,2,4,8]))
+g_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
+                target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
+                target_modifier = 'set_group_depth', target_range = np.array([1,4,16,64]))
 
-optimizer_targets = [d1_target, d2_target]
+
+
+optimizer_targets = [d1_target, d2_target,d3_target,g_target]
 
 # RESNET8
 # Get the onnx model, the mapping and accelerator arguments
@@ -45,8 +53,8 @@ optimizer_params = {'iterations':100,
     'optimizer_type':'simulated_annealing'}
 optimizer_params = {'area_budget':1.,
     'optimizer_type':'grid_search'}
-optimizer_params = {'iterations':100,
-    'init_iterations':2,
+optimizer_params = {'iterations':600,
+    'init_iterations':40,
     'area_budget':1.,
     'optimizer_type':'bayesian_optimization'}
 
@@ -64,10 +72,12 @@ mainstage = MainStage([  # Initializes the MainStage as entry point
     #GDStage,
     #NDOStage,
     BBOStage,
+    MultiProcessingGatherStage,
     ONNXModelParserStage,  # Parses the ONNX Model into the workload
     AcceleratorParserStage,  # Parses the accelerator
     PickleSaveStage, # Save CMEs to a pickle file
     WorkloadStage,  # Iterates through the different layers in the workload
+    MultiProcessingSpawnStage,
     MinimalEnergyStage, # Reduces all CMEs, returning minimal EDP one
     SpatialMappingGeneratorStage,  # Generates multiple spatial mappings (SM)
     LomaStage,  # Generates multiple temporal mappings (TM)

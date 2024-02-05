@@ -681,10 +681,14 @@ def fig_pareto_plot_m(parameter=None):
                 df_pareto_total = pd.concat([df_pareto_total, df_gm_pareto])
 
         df_pareto_total['M'] = df_pareto_total['M'].astype(str)
+        df_total['d1d2'] = 0
+        for i,r in df_total.iterrows():
+            df_total.loc[i,'d1d2'] = f'{r["D1"]} {r["D2"]}'
         breakpoint()
 
-        #fig = px.scatter(df_pareto_total, 'area', parameter, color='network', symbol='type',log_x=True,log_y=True) 
-        #fig.show()
+        fig = px.scatter(df_pareto_total, 'area', parameter, color='network', symbol='type',log_x=True,log_y=True) 
+        
+        fig.show()
         #breakpoint()
         
 
@@ -1669,9 +1673,9 @@ if __name__ == "__main__":
 #    fig_plot()
     #fig_M_comparison()
     #fig_d3_comparison()
-    #fig_pareto_plot_m()
+    fig_pareto_plot_m()
     #fig_pareto_plot_d1d2m()
-    fig_pareto_plot_d1d2d3m()
+    #fig_pareto_plot_d1d2d3m()
     #fig_pareto_plot_d1d2d3m_memory_shrink()
     #fig_plot_utilization_d1d2m()
     #fig_plot_utilization_d1d2d3m()

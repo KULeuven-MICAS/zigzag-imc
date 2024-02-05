@@ -28,10 +28,14 @@ class BayesianOptimizer(BlackBoxOptimizer):
     def runner(self):
         self.init_optimizer()
         for i in range(self.optimizer_params['iterations']):
-            logger.info(f'BO: Iteration {i}')
-            optimizer_targets = self.sample() 
-            self.get_cost(optimizer_targets)
-            self.update_optimizer()
+            try:
+                print(len(self.input_range))
+                logger.info(f'BO: Iteration {i} / {self.optimizer_params["iterations"]}')
+                optimizer_targets = self.sample() 
+                self.get_cost(optimizer_targets)
+                self.update_optimizer()
+            except:
+                break
         with open('data.pkl','wb') as infile:
             pickle.dump([self.input_samples, self.output_samples], infile)
         breakpoint()
@@ -42,12 +46,12 @@ class BayesianOptimizer(BlackBoxOptimizer):
                 dims = self.input_range[np.random.randint(self.input_range.shape[0])]
             else:
                 dims = self.input_range[np.argmax(self.ei)]
-            dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':1}
-            sample_correct = self.check_sample_correctness(dimensions)
+            dimensions = {'D1':int(dims[0]),'D2':int(dims[1]),'D3':int(dims[2])}
+            sample_correct = self.check_sample_correctness(dimensions, int(dims[3]))
             if sample_correct:
                 ba_mask = []
                 for ii_xx, xx in enumerate(self.input_range):
-                    if xx[0] == dims[0] and xx[1] == dims[1]:
+                    if all([xxx == dims[ii_xxx] for ii_xxx,xxx in enumerate(xx)]):
                         ba_mask.append(ii_xx)
                 self.input_range = np.delete(self.input_range, ba_mask, axis=0)
                 if not init:
@@ -58,7 +62,7 @@ class BayesianOptimizer(BlackBoxOptimizer):
                     ba_mask = []
                     print(f'Unfit dims {dimensions}')
                     for ii_xx, xx in enumerate(self.input_range):
-                        if xx[0] >= dims[0] and xx[1] >= dims[1]:
+                        if all([xxx == dims[ii_xxx] for ii_xxx,xxx in enumerate(xx)]):
                             ba_mask.append(ii_xx)
                     self.input_range = np.delete(self.input_range, ba_mask, axis=0)
                     self.ei = np.delete(self.ei, ba_mask, axis=0)
@@ -69,8 +73,8 @@ class BayesianOptimizer(BlackBoxOptimizer):
         return self.optimizer_targets
 
     
-    def check_sample_correctness(self, dimensions):
-        group_depth = 1
+    def check_sample_correctness(self, dimensions, group_depth):
+        group_depth = group_depth
         imc_array = imc_array_dut(dimensions, group_depth)
         if imc_array.total_area <= self.optimizer_params['area_budget']:
             return True
@@ -87,7 +91,7 @@ class BayesianOptimizer(BlackBoxOptimizer):
 
     def get_cost(self, optimizer_targets):
         self.kwargs['optimizer_targets'] = optimizer_targets
-        logger.info(f'BO: Evaluate array dimension: {[optimizer_targets[0].target_parameters, optimizer_targets[1].target_parameters]}')
+        logger.info(f'BO: Evaluate array dimension: {[x.target_parameters for x in optimizer_targets]}')
         sub_stage = self.list_of_callables[0](self.list_of_callables[1:],**self.kwargs)
         cme_list = []
         for cme, extra_info in sub_stage.run():
