@@ -1,6 +1,6 @@
 import numpy as np
 import itertools
-from utils import prime_factors
+from zigzag.classes.opt.CGA.utils import prime_factors
 from loguru import logger
 
 class Item():

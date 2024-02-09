@@ -1,6 +1,6 @@
 import numpy as np
 import itertools
-from item import Item
+from zigzag.classes.opt.CGA.item import Item
 import copy
 from loguru import logger
 
@@ -118,6 +118,9 @@ class SuperItemPool():
                 else:
                     superitem_copy = copy.deepcopy(superitem)
                     superitem_copy.add_item(item)
+                    for si in superitem_list:
+                        if all([x in si.layer_index_set for x in superitem_copy.layer_index_set]):
+                            return
                     item_pool_copy = copy.deepcopy(item_pool)
                     item_pool_copy = set([x for x in item_pool_copy if x != item])
                     SuperItemPool.superitem_generate_recursive(superitem_copy, item_pool_copy, max_height, superitem_list)
@@ -134,11 +137,10 @@ class SuperItemPool():
                 item_pool_copy = copy.deepcopy(self.item_pool)
                 item_pool_copy = set([x for x in item_pool_copy if x != item])
                 SuperItemPool.superitem_generate_recursive(si, item_pool_copy, height, superitem_list)
-
         # keep superitems with same base item and with same height that have largest volume
         optimal_superitem_list = []
         for height in self.height_list:
-            logger.info(f'Generating SuperItems for height {height}')
+#            logger.info(f'Generating SuperItems for height {height}')
             si_list = [x for x in superitem_list if x.height == height]
             unique_base_items = set([x.base_item for x in si_list])
             for bi in unique_base_items:
@@ -152,12 +154,10 @@ class SuperItemPool():
                     elif ubsi.get_volume() == max_volume:
                         optimal_ubsi_list.append(ubsi)
                 optimal_superitem_list += optimal_ubsi_list
-                if optimal_ubsi_list != []:
-                    for ub in optimal_ubsi_list:
-                        logger.info(f'Generated SuperItem #{len(optimal_superitem_list)} {ub}')
                 
 
         self.superitem_list = set(optimal_superitem_list)
+        logger.info(f'Generated SuperItems #{len(optimal_superitem_list)}')
         return set(optimal_superitem_list)
 
 

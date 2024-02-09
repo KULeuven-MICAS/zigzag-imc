@@ -1,6 +1,7 @@
-from item import Item, ItemPool
-from superitem import *
-from macro_bin import MacroBin
+from zigzag.classes.opt.CGA.item import Item, ItemPool
+from zigzag.classes.opt.CGA.superitem import *
+from zigzag.classes.opt.CGA.macro_bin import MacroBin
+from zigzag.classes.opt.CGA.utils import plot_item_allocation
 import numpy as np
 import itertools
 import copy
@@ -11,16 +12,17 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from ortools.sat.python import cp_model
 from loguru import logger
-from utils import plot_item_allocation
 
 
 
 class CGALayer():
-    def __init__(self):
+    def __init__(self, width, depth):
         self.height = 0
         self.layer_index_set = set()
         self.superitem_set = set()
         self.macro_allocation = 0
+        self.depth = depth
+        self.width = width
         self.volume = 0
         self.density = 0
         self.id = 0
@@ -48,6 +50,11 @@ class CGALayer():
         volume = np.sum([x.get_volume() for x in self.superitem_set])
         return volume
 
+    def get_total_volume(self):
+        total_volume = max([x.height for x in self.superitem_set]) * self.width * self.depth
+        return total_volume
+
+
     def get_area(self):
         area = np.sum([x.get_area() for x in self.superitem_set])
         return area
@@ -72,7 +79,8 @@ class LayerPool():
         return total_volume
 
 
-    def pack_2D(self, superitems):
+    @staticmethod
+    def pack_2D(superitems, layer):
         rectangles = []
         for ii_si, si in enumerate(superitems):
             rectangles.append((si.width, si.depth, ii_si))
@@ -83,7 +91,7 @@ class LayerPool():
             p.add_rect(*r)
         # Add the bins where the rectangles will be placed
         # WIDTH = D1, DEPTH = D2
-        p.add_bin(self.width, self.depth)
+        p.add_bin(layer.width, layer.depth)
         # Start packing
         p.pack()
         if len(p[0]) != len(rectangles):
@@ -112,7 +120,7 @@ class LayerPool():
             #            )
             #        )
             #    fig.savefig("rect_%(index)s.png" % locals(), dpi=144, bbox_inches='tight')
-            density = self.get_volume(superitems) / self.get_total_volume(superitems)
+            density = layer.get_volume() / layer.get_total_volume()
             return True, density, superitems
 
     def generate_cp_parameters(self):
@@ -143,7 +151,7 @@ class LayerPool():
         comb_list = list(comb)
         layer_list = []
         for n in range(1,int(num_layers)+1):
-            layer_new = CGALayer()
+            layer_new = CGALayer(self.width, self.depth)
             for si in comb_list:
                 si_new = SuperItem()
                 for i in si.item_set:
@@ -196,39 +204,54 @@ class LayerPool():
         return new_si_pool
 
 
+    @staticmethod
+    def layer_generate_recursive(layer, superitem_pool, layer_list):
+        if superitem_pool == set():
+            layer.density = layer.get_volume() / layer.get_total_volume()
+            layer_list.append(layer)
+        else:
+            for superitem in superitem_pool:
+                if superitem.layer_index_set.intersection(layer.layer_index_set) != set():
+                    LayerPool.layer_generate_recursive(layer, superitem_pool=set(), layer_list=layer_list)
+                else:
+                    superitem_set = copy.deepcopy(layer.superitem_set)
+                    superitem_set.add(copy.deepcopy(superitem))
+                    fitting, density, superitems_comb = LayerPool.pack_2D(list(superitem_set), layer)
+                    if not fitting:
+                        LayerPool.layer_generate_recursive(layer, superitem_pool=set(), layer_list=layer_list)
+                    else:    
+                        layer_copy = CGALayer(layer.width, layer.depth)
+                        for sic in superitems_comb:
+                            layer_copy.add_superitem(sic)
+                        layer_copy.density = density
+                        superitem_pool_copy = copy.deepcopy(superitem_pool)
+                        superitem_pool_copy = set([x for x in superitem_pool_copy if x != superitem])
+                        LayerPool.layer_generate_recursive(layer_copy, superitem_pool_copy, layer_list)
+
 
     def generate(self, superitem_pool):
         total_layer_list = []
         while superitem_pool != set():
             max_density = 0
-            best_comb = None
-            for k in range(len(superitem_pool),0,-1):
-                k_fitted = False
-                for comb in itertools.combinations(superitem_pool, k):
-                    if comb == None:
-                        break 
-                    # check that the combination contains at most
-                    # 1 item per layer
-                    layer_set_count = []
-                    for si in comb:
-                        layer_set_count += list(si.layer_index_set)
-                    cnt = Counter(layer_set_count)
-                    if any([x > 1 for k,x in cnt.items()]):
-                        continue
-                    fitting, density, superitems_comb = self.pack_2D(comb)
-                    if density > max_density:
-                        max_density = density
-                        best_comb = copy.deepcopy(superitems_comb)
-                        k_fitted = True
-                if k_fitted == False and best_comb is not None:
-                    break
+            for ii_si, si in enumerate(superitem_pool):
+                layer_list_si = []
+                layer = CGALayer(self.width, self.depth)
+                layer.add_superitem(si)
+                si_pool_copy = copy.deepcopy(superitem_pool)
+                si_pool_copy = set([x for x in si_pool_copy if x != si])
+                LayerPool.layer_generate_recursive(layer, si_pool_copy, layer_list_si)
+                for layer in layer_list_si:
+                    if layer.density > max_density:
+                        max_density = layer.density
+                        best_comb = copy.deepcopy(layer.superitem_set)
 
             layer_list = self.generate_layers_from_comb(best_comb)
             total_layer_list += layer_list
             superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
-            logger.info(f'Generated Layer #{len(total_layer_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+#            logger.info(f'Generated Layer #{len(total_layer_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
         self.total_layer_list = total_layer_list
+        logger.info(f'Generated Layers #{len(total_layer_list)}')
         return total_layer_list
 
 
