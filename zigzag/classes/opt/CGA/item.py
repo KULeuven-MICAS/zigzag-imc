@@ -2,11 +2,13 @@ import numpy as np
 import itertools
 from zigzag.classes.opt.CGA.utils import prime_factors
 from loguru import logger
+import copy
+import pandas as pd
 
 class Item():
     # D1 = width
     # D2 = depth
-    def __init__(self, *, height, width, depth, layer_index, tile_index):
+    def __init__(self, *, height, width, depth, layer_index, tile_index,D1_unroll, D2_unroll, D3_unroll):
         self.height = height
         self.depth = depth
         self.width = width
@@ -14,6 +16,9 @@ class Item():
         self.tile_index = tile_index
         self.volume = height * width * depth
         self.area = width * depth
+        self.D1_unroll = D1_unroll 
+        self.D2_unroll = D2_unroll 
+        self.D3_unroll = D3_unroll 
         self.x_pos = 0
         self.y_pos = 0
         self.z_pos = 0
@@ -88,13 +93,26 @@ class ItemPool():
             if item_repetition > self.D3:
                 feasible_tile_configuration = False
                 return None, feasible_tile_configuration, ii_n
-        #    for it in range(int(item_repetition)):
             width = np.prod([x[1] for x in d1_comb])
             depth = np.prod([x[1] for x in d2_comb])
-#            items.append({'width':width, 'depth':depth, 'height':1, 'volume':width*depth*1, 'network_layer':ii_n, 'weight': 1})
             if int(item_repetition) == 0:
                 breakpoint()
-            items.append(Item(width=int(width), depth=int(depth), height=int(n['M']), layer_index=ii_n, tile_index=int(item_repetition)))
+
+            d3_comb = []
+            for loop_type in ['K','C','FX','FY']:
+                if loop_type in ['C','FX','FY']:
+                    comb = d2_comb
+                else:
+                    comb = d1_comb
+                lp = next((x for x in comb if x[0] == loop_type),None)
+                if lp != None:
+                    d3_comb.append((loop_type, n[loop_type] / lp[1]))
+            if d1_comb == tuple():
+                d1_comb = (('K',1),)
+            if d2_comb == tuple():
+                d2_comb = (('C',1),)
+            items.append(Item(width=int(width), depth=int(depth), height=int(n['M']), layer_index=ii_n, tile_index=int(item_repetition), \
+                    D1_unroll = tuple(d1_comb), D2_unroll = tuple(d2_comb), D3_unroll = tuple(d3_comb)))
             logger.info(f"Generated #{len(items):4} {items[-1]}")
 
         self.item_pool = set(items)
@@ -118,7 +136,7 @@ class ItemPool():
                 self.network[layer_index][pf_cut[0]] /= pf_cut[1]
                 self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 self.network[layer_index][f'M'] *= pf_cut[1]
-                logger.info(f'Network update: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
+                logger.info(f'Mapping update: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
 
         for layer_index, layer in self.network.items():
             fitting = False
@@ -133,7 +151,7 @@ class ItemPool():
                 self.network[layer_index][pf_cut[0]] /= pf_cut[1]
                 self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 self.network[layer_index][f'M'] *= pf_cut[1]
-                logger.info(f'Network init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
+                logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
 
         feasible_configuration = False
         if any([x['M'] > self.M for x in self.network.values()]):
@@ -145,53 +163,48 @@ class ItemPool():
 
     
 
-    def update_network(self, target_layer_index=None):
-        latency = {}
-        weight_area = {}
-        max_latency = [0,0]
-        max_area = [0,0]
+    def update_mapping(self, target_layer_index=None):
+        latency = []
+        weight_area = []
+        vals = []
         for layer_index, layer in self.network.items():
-            latency[layer_index] = layer['OX'] * layer['OY'] * layer['Ct'] * layer['FXt'] * layer['FYt'] * layer['Kt']
-            weight_area[layer_index] = layer['C'] * layer['K'] * layer['FX'] * layer['FY']
-            if latency[layer_index] > max_latency[0]:
-                max_area[0] = 0
-                max_latency[0] = latency[layer_index]
-                max_latency[1] = layer_index
-                if weight_area[layer_index] > max_area[0]:
-                    max_area[0] = weight_area[layer_index]
-                    max_area[1] = layer_index
-            if latency[layer_index] == max_latency[0]:
-                if weight_area[layer_index] > max_area[0]:
-                    max_area[0] = weight_area[layer_index]
-                    max_area[1] = layer_index
-
-        if target_layer_index == None:
-            target_layer_index = max_area[1]
-        k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
-        if k_pf != []:
-            pf = k_pf
-            pf.sort(key = lambda x: x[1])
-            pf_cut = pf[0]
-            self.network[target_layer_index][pf_cut[0]] /= pf_cut[1]
-            self.network[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
-            self.network[target_layer_index][f'M'] *= pf_cut[1]
-            logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[target_layer_index][pf_cut[0]+"t"]}, M:{self.network[target_layer_index]["M"]}')
-        else:
+            latency.append(layer['OX'] * layer['OY'] * layer['Ct'] * layer['FXt'] * layer['FYt'] * layer['Kt'])
+            weight_area.append(layer['C'] * layer['K'] * layer['FX'] * layer['FY'])
+            vals.append({'network_index':layer_index,'latency':latency[-1],'weight_area':weight_area[-1]})
+        df = pd.DataFrame(vals)
+        df = df.sort_values(by=['latency','weight_area'],ascending=[True,False],ignore_index=True)
+        feasible_configuration = False
+        for i,r in df.iterrows():
+            target_layer_index = r.network_index
+            network_copy = copy.deepcopy(self.network)
+            k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
             c_pf = [('C',x) for x in prime_factors(self.network[target_layer_index]['C'])]
             fx_pf = [('FX',x) for x in prime_factors(self.network[target_layer_index]['FX'])]
             fy_pf = [('FY',x) for x in prime_factors(self.network[target_layer_index]['FY'])]
-            
-            pf = c_pf + fx_pf + fy_pf  
-            pf.sort(key = lambda x: x[1])
-            pf_cut = pf[0]
-            self.network[target_layer_index][pf_cut[0]] /= pf_cut[1]
-            self.network[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
-            self.network[target_layer_index][f'M'] *= pf_cut[1]
-            logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[target_layer_index][pf_cut[0]+"t"]}, M:{self.network[target_layer_index]["M"]}')
+            if all([x == [] for x in [k_pf, c_pf, fx_pf, fy_pf]]):
+                continue
+            if k_pf != []:
+                pf = k_pf
+                pf.sort(key = lambda x: x[1])
+                pf_cut = pf[0]
+                network_copy[target_layer_index][pf_cut[0]] /= pf_cut[1]
+                network_copy[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
+                network_copy[target_layer_index][f'M'] *= pf_cut[1]
+                logger.info(f'Mapping update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
+            else:
+                pf = c_pf + fx_pf + fy_pf  
+                pf.sort(key = lambda x: x[1])
+                pf_cut = pf[0]
+                network_copy[target_layer_index][pf_cut[0]] /= pf_cut[1]
+                network_copy[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
+                network_copy[target_layer_index][f'M'] *= pf_cut[1]
+                logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
 
-        feasible_configuration = False
-        if any([x['M'] > self.M for x in self.network.values()]):
-            return feasible_configuration
-        else:
-            feasible_configuration = True
-            return feasible_configuration
+            if any([x['M'] > self.M for x in network_copy.values()]):
+                continue
+            else:
+                self.network = network_copy
+                feasible_configuration = True
+                return feasible_configuration
+
+        return feasible_configuration

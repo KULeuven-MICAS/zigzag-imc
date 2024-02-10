@@ -27,7 +27,7 @@ def imc_array_dut(dimensions, group_depth):
         "wordline_dimension": "D1",         # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension": "D2",          # hardware dimension where bitline is (corresponds to the served dimension of output regs)
         "enable_cacti":         True,       # use CACTI to estimated cell array area cost (cell array exclude build-in logic part)
-        "adc_resolution": max(1, 0.5 * np.log2(dimensions['D1']))
+        "adc_resolution": 1#max(1, 0.5 * np.log2(dimensions['D1']))
         # Energy of writing weight. Required when enable_cacti is False.
         # "w_cost_per_weight_writing": 0.08,  # [OPTIONAL] unit: pJ/weight.
     }

@@ -37,17 +37,16 @@ class WeightPackingStage(Stage):
         network = self.extract_network_from_workload()
         solver_status = ""
         D1, D2, D3, M = self.get_IMC_dimension_parameters() 
-
+        kwargs = self.kwargs.copy()
         itempool = ItemPool(D1=D1,D2=D2,D3=D3,M=M,network=network)
         itempool.set_init_M()
         while solver_status not in ['OPTIMAL','FEASIBLE']:
             logger.info("===== ItemPool Generation =====")
             item_pool, feasible_tile_configuration, target_layer_index = itempool.generate()
             while not feasible_tile_configuration:
-                itempool.update_network(target_layer_index)
+                itempool.update_mapping(target_layer_index)
                 item_pool, feasible_tile_configuration, target_layer_index = itempool.generate()
             si = SuperItemPool(item_pool)
-            logger.info("===== ItemPool Generation Done =====")
             logger.info("===== SuperItemPool Generation =====")
             superitem_pool = si.generate()
             logger.info("===== LayerPool Generation =====")
@@ -60,18 +59,31 @@ class WeightPackingStage(Stage):
 
             #bin_dict, solver_status = macro_bin.pack_macrobin(layer_list, fsi, zsl, ol, nki)
             if solver_status in ['OPTIMAL','FEASIBLE']:
-                plot_item_allocation(layer_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
-                logger.success('>>>> Completed allocation <<<<')
+        #        plot_item_allocation(layer_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
+                self.generate_mappings(network, item_pool)
+                logger.info('>>>> Completed allocation <<<<')
                 break
             else:
-                feasible_configuration = itempool.update_network()
+                feasible_configuration = itempool.update_mapping()
             if not feasible_configuration:
                 logger.error('>>>> Unfeasible settings for D1,D2,D3,M <<<<')
                 exit()
-
-        sub_stage = self.list_of_callables[0](self.list_of_callables[1:], self.workload, **kwargs)
-        for cme, extra_info in sub_stage.run():
+        kwargs['workload'] = self.workload
+        sub_stage = self.list_of_callables[0](self.list_of_callables[1:], **kwargs)
+        for cme, (layer, extra_info) in sub_stage.run():
             yield cme, (layer, extra_info)
+
+
+    def generate_mappings(self, network, item_pool):
+        for layer in self.workload:
+            if type(layer) == DummyNode:
+                continue  # skip the DummyNodes
+
+            layer_id = next((k for k,v in network.items() if v['layer_id'] == layer.id),None)
+            layer_item = next((x for x in item_pool if x.layer_index == layer_id),None) 
+            new_spatial_mapping = {'D1':layer_item.D1_unroll, 'D2':layer_item.D2_unroll, 'D3':layer_item.D3_unroll}
+            layer.user_spatial_mapping = new_spatial_mapping
+
 
     def get_IMC_dimension_parameters(self):
         imc_dim = self.kwargs['accelerator'].cores[0].operational_array.dimensions
@@ -85,7 +97,7 @@ class WeightPackingStage(Stage):
 
     def extract_network_from_workload(self):
         network = {}
-        base_layer = {'K':1, 'C':1, 'FX':1,'FY':1, 'OX':1, 'OY':1, 'Ct':1, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1}
+        base_layer = {'K':1, 'C':1, 'FX':1,'FY':1, 'OX':1, 'OY':1, 'Ct':1, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':1}
         i = 0
         for id, layer in enumerate(nx.topological_sort(self.workload)):
             if type(layer) == DummyNode:
@@ -94,7 +106,9 @@ class WeightPackingStage(Stage):
             new_layer = copy.deepcopy(base_layer)
             for k,v in loop_dim_size.items():
                 new_layer[k] = v
+            new_layer['layer_id'] = layer.id
             network[i] = new_layer
+
             i += 1
 
         return network

@@ -123,8 +123,6 @@ class MacroBin():
             if len(total_bin_alloc_list) > self.D3:
                 pbar.close()
                 logger.warning(f'Exceeded number of D3')
-                print([[(x.layer_index_set,x.height) for x in y] for y in newly_added_layers])
-                breakpoint()
                 return None, "UNFEASIBLE" 
             pbar.update(init_range - len(layer_lite_list))
             init_range = len(layer_lite_list)
@@ -137,7 +135,6 @@ class MacroBin():
                     bin_dict[i].append(l)
 
         logger.info(f'Generated Bins #{len(total_bin_alloc_list)}')#; Layers to be assigned: {len(layer_lite_list)}')
-        breakpoint()
         return bin_dict, "OPTIMAL"
 
 

@@ -72,13 +72,13 @@ mainstage = MainStage([  # Initializes the MainStage as entry point
     #GDStage,
     #NDOStage,
     BBOStage,
-    MultiProcessingGatherStage,
+    #MultiProcessingGatherStage,
     ONNXModelParserStage,  # Parses the ONNX Model into the workload
     AcceleratorParserStage,  # Parses the accelerator
-    WeightPackingStage,
     PickleSaveStage, # Save CMEs to a pickle file
+    WeightPackingStage,
     WorkloadStage,  # Iterates through the different layers in the workload
-    MultiProcessingSpawnStage,
+    #MultiProcessingSpawnStage,
     MinimalEnergyStage, # Reduces all CMEs, returning minimal EDP one
     SpatialMappingGeneratorStage,  # Generates multiple spatial mappings (SM)
     LomaStage,  # Generates multiple temporal mappings (TM)
