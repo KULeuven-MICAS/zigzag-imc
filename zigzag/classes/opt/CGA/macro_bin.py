@@ -82,7 +82,7 @@ class MacroBin():
         
         # progress bar
         init_range = len(layer_lite_list)
-        pbar = tqdm(total=init_range)
+#        pbar = tqdm(total=init_range)
 
         while layer_lite_list != []:
             valid_layer_subsets = [[layer_lite_list[0]]]
@@ -121,12 +121,12 @@ class MacroBin():
                     layer_alloc_list += [x.id for x in subset]
                     layer_lite_list = [x for x in layer_lite_list if x.id not in layer_alloc_list]
             if len(total_bin_alloc_list) > self.D3:
-                pbar.close()
-                logger.warning(f'Exceeded number of D3')
+#                pbar.close()
+#                logger.warning(f'Exceeded number of D3')
                 return None, "UNFEASIBLE" 
-            pbar.update(init_range - len(layer_lite_list))
+            #pbar.update(init_range - len(layer_lite_list))
             init_range = len(layer_lite_list)
-        pbar.close()
+        #pbar.close()
         bin_dict =  {}
         for i in range(self.D3):
             bin_dict[i] = []
@@ -134,7 +134,7 @@ class MacroBin():
                 for ii_l, l in enumerate(total_bin_alloc_list[i]):
                     bin_dict[i].append(l)
 
-        logger.info(f'Generated Bins #{len(total_bin_alloc_list)}')#; Layers to be assigned: {len(layer_lite_list)}')
+        #logger.info(f'Generated Bins #{len(total_bin_alloc_list)}')#; Layers to be assigned: {len(layer_lite_list)}')
         return bin_dict, "OPTIMAL"
 
 

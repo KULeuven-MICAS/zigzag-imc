@@ -251,7 +251,7 @@ class LayerPool():
 #            logger.info(f'Generated Layer #{len(total_layer_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
         self.total_layer_list = total_layer_list
-        logger.info(f'Generated Layers #{len(total_layer_list)}')
+#        logger.info(f'Generated Layers #{len(total_layer_list)}')
         return total_layer_list
 
 

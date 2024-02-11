@@ -157,7 +157,7 @@ class SuperItemPool():
                 
 
         self.superitem_list = set(optimal_superitem_list)
-        logger.info(f'Generated SuperItems #{len(optimal_superitem_list)}')
+        #logger.info(f'Generated SuperItems #{len(optimal_superitem_list)}')
         return set(optimal_superitem_list)
 
 
