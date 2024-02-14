@@ -8,16 +8,16 @@ import numpy as np
 
 d1_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',0)],
-                target_modifier = 'set_array_dim', target_range = np.array([1]))
+                target_modifier = 'set_array_dim', target_range = np.array([32]))
 d2_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',1)],
-                target_modifier = 'set_array_dim', target_range = np.array([24]))
+                target_modifier = 'set_array_dim', target_range = np.array([32]))
 d3_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',2)],
-                target_modifier = 'set_array_dim', target_range = np.array([384]))
+                target_modifier = 'set_array_dim', target_range = np.array([4]))
 g_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
-                target_modifier = 'set_group_depth', target_range = np.array([256]))
+                target_modifier = 'set_group_depth', target_range = np.array([32]))
 
 
 
@@ -55,7 +55,7 @@ optimizer_params = {'area_budget':1.,
     'optimizer_type':'grid_search'}
 optimizer_params = {'iterations':600,
     'init_iterations':40,
-    'area_budget':1.,
+    'area_budget':1000.,
     'optimizer_type':'bayesian_optimization'}
 
 #optimizer_params = {'iterations':10,

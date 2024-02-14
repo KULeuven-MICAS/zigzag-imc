@@ -15,7 +15,7 @@ from loguru import logger
 
 
 
-class CGALayer():
+class CGAColumn():
     def __init__(self, width, depth):
         self.height = 0
         self.layer_index_set = set()
@@ -67,13 +67,13 @@ class CGALayer():
         return area
 
 
-class LayerPool():
+class ColumnPool():
     def __init__(self, D1, D2, network_layers):
         self.width = D1
         self.depth = D2
         self.superitem_index = 0
         self.item_index = 0
-        self.layer_index = 0
+        self.column_index = 0
         self.n_network_layers = network_layers
 
 
@@ -87,7 +87,7 @@ class LayerPool():
 
 
     @staticmethod
-    def pack_2D(superitems, layer):
+    def pack_2D(superitems, column):
         rectangles = []
         for ii_si, si in enumerate(superitems):
             rectangles.append((si.width, si.depth, ii_si))
@@ -98,7 +98,7 @@ class LayerPool():
             p.add_rect(*r)
         # Add the bins where the rectangles will be placed
         # WIDTH = D1, DEPTH = D2
-        p.add_bin(layer.width, layer.depth)
+        p.add_bin(column.width, column.depth)
         # Start packing
         p.pack()
         if len(p[0]) != len(rectangles):
@@ -106,59 +106,44 @@ class LayerPool():
         else:
             for index, abin in enumerate(p):
                 bw, bh  = abin.width, abin.height
-            #    print('bin', bw, bh, "nr of rectangles in bin", len(abin))
-            #    fig = plt.figure()
-            #    ax = fig.add_subplot(111, aspect='equal')
                 for ii_r in range(len(superitems)):
                     rect = next((x for x in abin if x.rid == ii_r),None)
                     x, y, w, h = rect.x, rect.y, rect.width, rect.height
                     superitems[ii_r].x_pos = x
                     superitems[ii_r].y_pos = y
-            #        plt.axis([0,bw,0,bh])
-            #        print('rectangle', w,h)
-            #        ax.add_patch(
-            #            patches.Rectangle(
-            #                (x, y),  # (x,y)
-            #                w,          # width
-            #                h,          # height
-            #                facecolor="#00ffff",
-            #                edgecolor="black",
-            #                linewidth=3
-            #            )
-            #        )
-            #    fig.savefig("rect_%(index)s.png" % locals(), dpi=144, bbox_inches='tight')
-            density = layer.get_volume() / layer.get_total_volume()
+
+            density = column.get_volume() / column.get_total_volume()
             return True, density, superitems
 
     def generate_cp_parameters(self):
         fsi = np.zeros((self.superitem_index, self.item_index), dtype=np.int8)
-        zsl = np.zeros((self.superitem_index, self.layer_index), dtype=np.int8)
-        ol = np.zeros((self.layer_index,), dtype=np.int64)
-        nki = np.zeros((self.n_network_layers, self.item_index), dtype=np.int8)
+        zsl = np.zeros((self.superitem_index, self.column_index), dtype=np.int8)
+        ol = np.zeros((self.column_index,), dtype=np.int64)
+        nki = np.zeros((self.n_network_columns, self.item_index), dtype=np.int8)
 
-        for ii_l, l in enumerate(self.total_layer_list):
+        for ii_l, l in enumerate(self.total_column_list):
             ol[l.id] = int(l.height)
             for ii_s, s in enumerate(l.superitem_set):
                 zsl[s.id, l.id] = 1
                 for ii_i, i in enumerate(s.item_set):
                     fsi[s.id, i.id] = 1
-                    nki[i.layer_index, i.id] = 1
+                    nki[i.column_index, i.id] = 1
 
         return fsi, zsl, ol, nki 
 
         
 
-    def generate_layers_from_comb(self, comb):
-        num_layers = float('inf')
+    def generate_columns_from_comb(self, comb):
+        num_columns = float('inf')
         for si in comb:
             for i in si.item_set:
-                if i.tile_index < num_layers:
-                    num_layers = i.tile_index
+                if i.tile_index < num_columns:
+                    num_columns = i.tile_index
         
         comb_list = list(comb)
-        layer_list = []
-        for n in range(1,int(num_layers)+1):
-            layer_new = CGALayer(self.width, self.depth)
+        column_list = []
+        for n in range(1,int(num_columns)+1):
+            column_new = CGAColumn(self.width, self.depth)
             for si in comb_list:
                 si_new = SuperItem()
                 for i in si.item_set:
@@ -171,21 +156,21 @@ class LayerPool():
                     si_new.add_item(ix)
                 si_new.id = self.superitem_index
                 self.superitem_index += 1
-                layer_new.add_superitem(si_new)
-            layer_new.id = self.layer_index
-            layer_new.height = max([x.height for x in layer_new.superitem_set])
-            self.layer_index += 1
-            #print([[x for x in y.item_set] for y in layer_new.superitem_set])
-            layer_list.append(layer_new)
+                column_new.add_superitem(si_new)
+            column_new.id = self.column_index
+            column_new.height = max([x.height for x in column_new.superitem_set])
+            self.column_index += 1
+            #print([[x for x in y.item_set] for y in column_new.superitem_set])
+            column_list.append(column_new)
 
-        return layer_list
+        return column_list
 
     def update_superitem_pool(self, superitem_pool, comb):
-        num_layers = float('inf')
+        num_columns = float('inf')
         for si in comb:
             for i in si.item_set:
-                if i.tile_index < num_layers:
-                    num_layers = i.tile_index
+                if i.tile_index < num_columns:
+                    num_columns = i.tile_index
 
         new_si_pool = set()
         comb_items = [[x for x in y.item_set] for y in comb]
@@ -196,7 +181,7 @@ class LayerPool():
             for i in si.item_set:
                 if i in comb_items:
                     ix = copy.deepcopy(i)
-                    ix.tile_index -= num_layers
+                    ix.tile_index -= num_columns
                     if ix.tile_index <= 0:
                         tiles_to_be_allocated_still = False
                         break
@@ -212,54 +197,54 @@ class LayerPool():
 
 
     @staticmethod
-    def layer_generate_recursive(layer, superitem_pool, layer_list):
+    def column_generate_recursive(column, superitem_pool, column_list):
         if superitem_pool == set():
-            layer.density = layer.get_volume() / layer.get_total_volume()
-            layer_list.append(layer)
+            column.density = column.get_volume() / column.get_total_volume()
+            column_list.append(column)
         else:
             for superitem in superitem_pool:
-                if superitem.layer_index_set.intersection(layer.layer_index_set) != set():
-                    LayerPool.layer_generate_recursive(layer, superitem_pool=set(), layer_list=layer_list)
+                if superitem.layer_index_set.intersection(column.layer_index_set) != set():
+                    ColumnPool.column_generate_recursive(column, superitem_pool=set(), column_list=column_list)
                 else:
-                    superitem_set = copy.deepcopy(layer.superitem_set)
+                    superitem_set = copy.deepcopy(column.superitem_set)
                     superitem_set.add(copy.deepcopy(superitem))
-                    fitting, density, superitems_comb = LayerPool.pack_2D(list(superitem_set), layer)
+                    fitting, density, superitems_comb = ColumnPool.pack_2D(list(superitem_set), column)
                     if not fitting:
-                        LayerPool.layer_generate_recursive(layer, superitem_pool=set(), layer_list=layer_list)
+                        ColumnPool.column_generate_recursive(column, superitem_pool=set(), column_list=column_list)
                     else:    
-                        layer_copy = CGALayer(layer.width, layer.depth)
+                        column_copy = CGAColumn(column.width, column.depth)
                         for sic in superitems_comb:
-                            layer_copy.add_superitem(sic)
-                        layer_copy.density = density
+                            column_copy.add_superitem(sic)
+                        column_copy.density = density
                         superitem_pool_copy = copy.deepcopy(superitem_pool)
                         superitem_pool_copy = set([x for x in superitem_pool_copy if x != superitem])
-                        LayerPool.layer_generate_recursive(layer_copy, superitem_pool_copy, layer_list)
+                        ColumnPool.column_generate_recursive(column_copy, superitem_pool_copy, column_list)
 
 
     def generate(self, superitem_pool):
-        total_layer_list = []
+        total_column_list = []
         while superitem_pool != set():
             max_density = 0
             for ii_si, si in enumerate(superitem_pool):
-                layer_list_si = []
-                layer = CGALayer(self.width, self.depth)
-                layer.add_superitem(si)
+                column_list_si = []
+                column = CGAColumn(self.width, self.depth)
+                column.add_superitem(si)
                 si_pool_copy = copy.deepcopy(superitem_pool)
                 si_pool_copy = set([x for x in si_pool_copy if x != si])
-                LayerPool.layer_generate_recursive(layer, si_pool_copy, layer_list_si)
-                for layer in layer_list_si:
-                    if layer.density > max_density:
-                        max_density = layer.density
-                        best_comb = copy.deepcopy(layer.superitem_set)
+                ColumnPool.column_generate_recursive(column, si_pool_copy, column_list_si)
+                for column in column_list_si:
+                    if column.density > max_density:
+                        max_density = column.density
+                        best_comb = copy.deepcopy(column.superitem_set)
 
-            layer_list = self.generate_layers_from_comb(best_comb)
-            total_layer_list += layer_list
+            column_list = self.generate_columns_from_comb(best_comb)
+            total_column_list += column_list
             superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
-#            logger.info(f'Generated Layer #{len(total_layer_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+#            logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
-        self.total_layer_list = total_layer_list
-#        logger.info(f'Generated Layers #{len(total_layer_list)}')
-        return total_layer_list
+        self.total_column_list = total_column_list
+#        logger.info(f'Generated Layers #{len(total_column_list)}')
+        return total_column_list
 
 
 
@@ -287,22 +272,22 @@ if __name__ == "__main__":
     itempool.set_init_M()
     while solver_status not in ['OPTIMAL','FEASIBLE']:
         logger.info("===== ItemPool Generation =====")
-        item_pool, feasible_tile_configuration, target_layer_index = itempool.generate()
+        item_pool, feasible_tile_configuration, target_column_index = itempool.generate()
         while not feasible_tile_configuration:
-            itempool.update_network(target_layer_index)
-            item_pool, feasible_tile_configuration, target_layer_index = itempool.generate()
+            itempool.update_network(target_column_index)
+            item_pool, feasible_tile_configuration, target_column_index = itempool.generate()
         si = SuperItemPool(item_pool)
         logger.success("===== ItemPool Generation Done =====")
         logger.info("===== SuperItemPool Generation =====")
         superitem_pool = si.generate()
-        logger.info("===== LayerPool Generation =====")
-        layer_pool = LayerPool(D1=D1,D2=D2, network_layers=len(network.keys()))
-        layer_list = layer_pool.generate(superitem_pool)
-        fsi, zsl, ol, nki = layer_pool.generate_cp_parameters()
+        logger.info("===== ColumnPool Generation =====")
+        column_pool = ColumnPool(D1=D1,D2=D2, network_columns=len(network.keys()))
+        column_list = column_pool.generate(superitem_pool)
+        fsi, zsl, ol, nki = column_pool.generate_cp_parameters()
         macro_bin = MacroBin(height=M, number_of_macros=D3)
-        bin_dict, solver_status = macro_bin.pack_macrobin(layer_list, fsi, zsl, ol, nki)
+        bin_dict, solver_status = macro_bin.pack_macrobin(column_list, fsi, zsl, ol, nki)
         if solver_status in ['OPTIMAL','FEASIBLE']:
-            plot_item_allocation(layer_list, bin_dict, D3=D3, height=M,D1=D1,D2=D2)
+            plot_item_allocation(column_list, bin_dict, D3=D3, height=M,D1=D1,D2=D2)
             logger.success('>>>> Completed allocation <<<<')
             break
         else:
