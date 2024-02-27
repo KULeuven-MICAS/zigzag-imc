@@ -118,7 +118,7 @@ class ItemPool():
                 d2_comb = (('C',1),)
             items.append(Item(width=int(width), depth=int(depth), height=int(n['M']), layer_index=ii_n, tile_index=int(item_repetition), \
                     D1_unroll = tuple(d1_comb), D2_unroll = tuple(d2_comb), D3_unroll = tuple(d3_comb)))
-            logger.info(f"Generated #{len(items):4} {items[-1]}")
+            #logger.info(f"Generated #{len(items):4} {items[-1]}")
 
         self.item_pool = set(items)
         #logger.info(f"Generated Items #{len(items):4}")
@@ -169,7 +169,7 @@ class ItemPool():
 
     
 
-    def update_mapping(self, target_layer_index=None):
+    def update_mapping(self, target_layer_index_r=None):
         latency = []
         weight_area = []
         vals = []
@@ -180,8 +180,12 @@ class ItemPool():
         df = pd.DataFrame(vals)
         df = df.sort_values(by=['latency','weight_area'],ascending=[True,False],ignore_index=True)
         feasible_configuration = False
+
         for i,r in df.iterrows():
             target_layer_index = r.network_index
+            if target_layer_index_r != None:
+                if target_layer_index != target_layer_index_r:
+                    continue
             network_copy = copy.deepcopy(self.network)
             k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
             c_pf = [('C',x) for x in prime_factors(self.network[target_layer_index]['C'])]

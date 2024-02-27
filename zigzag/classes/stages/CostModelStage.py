@@ -52,12 +52,16 @@ class CostModelStage(Stage):
             temporal_mapping,
             access_same_data_considered_as_no_access,
         )
+        self.extra_cells = kwargs['extra_cells']
+        self.extra_rows = kwargs['extra_rows']
 
     ## Run the cost model stage by calling the internal zigzag cost model with the correct inputs.
     def run(self) -> Generator[Tuple[CostModelEvaluation, Any], None, None]:
         core_id = self.layer.core_allocation
         core = self.accelerator.get_core(core_id)
         operational_array = core.operational_array
+        extra_cells = self.extra_cells[self.layer.id] if self.extra_cells != {} else 0
+        extra_rows = self.extra_rows[self.layer.id] if self.extra_rows != {} else 0
         pe_type = getattr(operational_array, "pe_type", None) # return None if it does not exist
         if pe_type is not None and pe_type in ["in_sram_computing"]: # if pe_type exists and in the list
             self.cme = CostModelEvaluationForIMC(
@@ -68,6 +72,8 @@ class CostModelStage(Stage):
                 temporal_mapping=self.temporal_mapping,
                 # the below parameter is optional
                 access_same_data_considered_as_no_access=self.access_same_data_considered_as_no_access,
+                extra_cells=extra_cells,
+                extra_rows=extra_rows
             )
         else:
             self.cme = CostModelEvaluation(

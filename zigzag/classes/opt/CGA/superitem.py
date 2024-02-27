@@ -119,6 +119,9 @@ class SuperItemPool():
                     superitem_copy = copy.deepcopy(superitem)
                     superitem_copy.add_item(item)
                     for si in superitem_list:
+                        # Check if it already exists a superitem in superitem_list that
+                        # contains all the layers of the current superitem
+                        # If it already exists, any other combination that can stem from this superitem will be suboptimal
                         if all([x in si.layer_index_set for x in superitem_copy.layer_index_set]):
                             return
                     item_pool_copy = copy.deepcopy(item_pool)

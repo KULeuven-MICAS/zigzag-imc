@@ -24,9 +24,8 @@ class AcceleratorParserStage(Stage):
 
     def run(self):
         #if self.accelerator_parser is not None:
-        self.accelerator_parser.run()
+        self.accelerator_parser.run(int(self.kwargs['optimizer_targets'][-1].target_parameters))
         self.accelerator = self.accelerator_parser.get_accelerator()
-
         if 'optimizer_targets' in self.kwargs.keys():
             optimizer_targets = self.kwargs['optimizer_targets']
             for optimizer_target in optimizer_targets:

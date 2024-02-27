@@ -44,8 +44,11 @@ class CGAColumn():
 
     def add_superitem(self, superitem):
         self.superitem_set.add(superitem)
-        if superitem.height > max([x.height for x in self.superitem_set]):
+        if self.superitem_set == set():
             self.height = superitem.height
+        else:
+            if superitem.height >= max([x.height for x in self.superitem_set]):
+                self.height = superitem.height
         self.layer_index_set.update(superitem.layer_index_set)
         if self.actual_width < superitem.x_pos + superitem.width:
             self.actual_width = superitem.x_pos + superitem.width
@@ -132,6 +135,29 @@ class ColumnPool():
         return fsi, zsl, ol, nki 
 
         
+    def generate_columns_from_comb_not_allocated(self, comb):
+        
+        comb_list = list(comb)
+        column_list = []
+        column_new = CGAColumn(self.width, self.depth)
+        for si in comb_list:
+            si_new = SuperItem()
+            for i in si.item_set:
+                ix = copy.deepcopy(i)
+                ix.x_pos = si.x_pos
+                ix.y_pos = si.y_pos
+                si_new.add_item(ix)
+            si_new.id = self.superitem_index
+            self.superitem_index += 1
+            column_new.add_superitem(si_new)
+        column_new.id = self.column_index
+        column_new.height = max([x.height for x in column_new.superitem_set])
+        self.column_index += 1
+        #print([[x for x in y.item_set] for y in column_new.superitem_set])
+        column_list.append(column_new)
+
+        return column_list
+
 
     def generate_columns_from_comb(self, comb):
         num_columns = float('inf')
@@ -164,6 +190,22 @@ class ColumnPool():
             column_list.append(column_new)
 
         return column_list
+
+
+    def update_superitem_pool_nac(self, superitem_pool, comb):
+        comb_items = [[x for x in y.item_set] for y in comb]
+        comb_items = [j for i in comb_items for j in i]
+
+        for c in comb_items:
+            si = next((x for x in superitem_pool if c in x.item_set),None)
+            while si != None:
+                superitem_pool = set([x for x in superitem_pool if x != si])
+                si = next((x for x in superitem_pool if c in x.item_set),None)
+
+
+        return superitem_pool
+
+
 
     def update_superitem_pool(self, superitem_pool, comb):
         num_columns = float('inf')
@@ -217,21 +259,125 @@ class ColumnPool():
                             column_copy.add_superitem(sic)
                         column_copy.density = density
                         superitem_pool_copy = copy.deepcopy(superitem_pool)
-                        superitem_pool_copy = set([x for x in superitem_pool_copy if x != superitem])
+                        superitem_pool_copy = set([x for x in superitem_pool_copy if x != superitem and x.get_volume() <= superitem.get_volume()])
                         ColumnPool.column_generate_recursive(column_copy, superitem_pool_copy, column_list)
+
+    @staticmethod
+    def column_generate_recursive_nac(column, superitem_pool, column_list, bin_dict_layers):
+        if superitem_pool == set():
+            column.density = column.get_volume() / column.get_total_volume()
+            if any([x.intersection(column.layer_index_set) == set() for x in bin_dict_layers.values()]):
+                column_list.append(column)
+        else:
+            for superitem in superitem_pool:
+                if superitem.layer_index_set.intersection(column.layer_index_set) != set():
+                    ColumnPool.column_generate_recursive_nac(column, superitem_pool=set(), column_list=column_list, bin_dict_layers=bin_dict_layers)
+                else:
+                    superitem_set = copy.deepcopy(column.superitem_set)
+                    superitem_set.add(copy.deepcopy(superitem))
+                    fitting, density, superitems_comb = ColumnPool.pack_2D(list(superitem_set), column)
+                    if not fitting:
+                        ColumnPool.column_generate_recursive_nac(column, superitem_pool=set(), column_list=column_list, bin_dict_layers=bin_dict_layers)
+                    else:    
+                        column_copy = CGAColumn(column.width, column.depth)
+                        for sic in superitems_comb:
+                            column_copy.add_superitem(sic)
+                        column_copy.density = density
+                        superitem_pool_copy = copy.deepcopy(superitem_pool)
+                        superitem_pool_copy = set([x for x in superitem_pool_copy if x != superitem and x.get_volume() <= superitem.get_volume()])
+                        ColumnPool.column_generate_recursive_nac(column_copy, superitem_pool_copy, column_list, bin_dict_layers=bin_dict_layers)
+
+
+    def generate_not_allocated(self,not_allocated_superitem_pool, bin_dict, column_list, height):
+        self.column_index = len(column_list)
+        bin_dict_layers = {}
+        new_bin_dict_allocation = {}
+        for k,v  in bin_dict.items():
+            bin_dict_layers[k] = set()
+            for c in v:
+                col = next((x for x in column_list if x.id == c),None)
+                bin_dict_layers[k].update(col.layer_index_set)
+        total_column_list = []
+        superitem_pool = not_allocated_superitem_pool
+        while superitem_pool != set():
+            max_density = 0
+            max_height = max([x.height for x in superitem_pool if len(x.item_set) == 1])
+            superitem_pool_redux = [x for x in superitem_pool if x.height == max_height and len(x.item_set) == 1]
+            best_column = None
+            for ii_si, si in enumerate(superitem_pool_redux):
+                column_list_si = []
+                column = CGAColumn(self.width, self.depth)
+                column.add_superitem(si)
+                column.density = (si.width * si.depth) / (self.width * self.depth)
+                column_list_si.append(column)
+                si_pool_copy = copy.deepcopy(superitem_pool)
+                si_pool_copy = set([x for x in si_pool_copy if x != si])
+                ColumnPool.column_generate_recursive_nac(column, si_pool_copy, column_list_si, bin_dict_layers)
+                for column in column_list_si:
+                    if column.density > max_density:
+                        max_density = column.density
+                        best_comb = copy.deepcopy(column.superitem_set)
+                        best_column = copy.deepcopy(column)
+            assert best_column != None
+            new_column_list = self.generate_columns_from_comb_not_allocated(best_comb)
+            total_column_list += new_column_list
+            aa = len(superitem_pool)
+            superitem_pool = self.update_superitem_pool_nac(superitem_pool, best_comb)
+            assert  aa > len(superitem_pool)
+            # Assign column to new_bin_dict
+            min_rw = float('inf')
+            min_k = None
+            for k,v in bin_dict_layers.items():
+                if best_column.layer_index_set.intersection(v) == set():
+                    if k in new_bin_dict_allocation.keys():
+                        if sum([x.height for x in new_bin_dict_allocation[k][-1]]) + best_column.height <= height:
+                            if len(new_bin_dict_allocation[k]) < min_rw:
+                                min_rw = len(new_bin_dict_allocation[k])
+                                min_k = k
+                        else:
+                            if len(new_bin_dict_allocation[k])+1 < min_rw:
+                                min_rw = len(new_bin_dict_allocation[k])+1
+                                min_k = k
+                    else:
+                        min_rw = 1
+                        min_k = k
+            if min_k in new_bin_dict_allocation.keys():
+                if sum([x.height for x in new_bin_dict_allocation[min_k][-1]]) + best_column.height <= height:
+                    new_bin_dict_allocation[min_k][-1].append(best_column)
+                    bin_dict_layers[min_k].update(best_column.layer_index_set)
+                else:
+                    new_bin_dict_allocation[min_k].append([best_column])
+                    bin_dict_layers[min_k].update(best_column.layer_index_set)
+            else:
+                new_bin_dict_allocation[min_k] = [[best_column]]
+                bin_dict_layers[min_k].update(best_column.layer_index_set)
+
+
+#            logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+
+        self.total_column_list = total_column_list
+        for k in bin_dict.keys():
+            if k not in new_bin_dict_allocation.keys():
+                new_bin_dict_allocation[k] = []
+        #logger.info(f'Generated Columns #{len(total_column_list)}')
+        return total_column_list, new_bin_dict_allocation
 
 
     def generate(self, superitem_pool):
         total_column_list = []
         while superitem_pool != set():
+            #logger.info(f'Superitem to be assigned: {len(superitem_pool)}')
             max_density = 0
-            for ii_si, si in enumerate(superitem_pool):
+            max_height = max([x.height for x in superitem_pool if len(x.item_set) == 1])
+            superitem_pool_redux = [x for x in superitem_pool if x.height == max_height and len(x.item_set) == 1]
+            for ii_si, si in enumerate(superitem_pool_redux):
                 column_list_si = []
                 column = CGAColumn(self.width, self.depth)
                 column.add_superitem(si)
                 si_pool_copy = copy.deepcopy(superitem_pool)
                 si_pool_copy = set([x for x in si_pool_copy if x != si])
                 ColumnPool.column_generate_recursive(column, si_pool_copy, column_list_si)
+                #print(f'Number of columns {len(column_list_si)}')
                 for column in column_list_si:
                     if column.density > max_density:
                         max_density = column.density
@@ -243,7 +389,8 @@ class ColumnPool():
 #            logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
         self.total_column_list = total_column_list
-#        logger.info(f'Generated Layers #{len(total_column_list)}')
+        #logger.info(f'Generated Columns #{len(total_column_list)}')
+
         return total_column_list
 
 

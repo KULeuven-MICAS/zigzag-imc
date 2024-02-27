@@ -30,10 +30,10 @@ class AcceleratorParser:
             "tpu": "zigzag.inputs.examples.hardware.TPU_like"
         }
 
-    def run(self):
+    def run(self, group_depth):
         if not self.accelerator:
             try:
-                accelerator = self.parse_accelerator_from_path(self.accelerator_path)
+                accelerator = self.parse_accelerator_from_path(self.accelerator_path, group_depth)
             except ModuleNotFoundError:
                 try:
                     accelerator = self.parse_supported_accelerator(self.accelerator_path)
@@ -45,10 +45,11 @@ class AcceleratorParser:
     @staticmethod
     ## Parse the input accelerator residing in accelerator_path
     # @param accelerator_path
-    def parse_accelerator_from_path(accelerator_path):
+    def parse_accelerator_from_path(accelerator_path, group_depth):
         global module
         module = importlib.import_module(accelerator_path)
-        accelerator = module.accelerator
+#        accelerator = module.accelerator
+        accelerator = module.get_accelerator(group_depth)
         #logger.info(f"Parsed accelerator with cores {[core.id for core in accelerator.cores]}.")
         return accelerator
 

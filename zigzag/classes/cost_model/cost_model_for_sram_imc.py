@@ -46,6 +46,8 @@ class CostModelEvaluationForIMC:
         spatial_mapping_int,
         temporal_mapping,
         access_same_data_considered_as_no_access=True,
+        extra_cells=0,
+        extra_rows=0
     ):
         self.accelerator = accelerator
         self.layer = layer
@@ -55,6 +57,8 @@ class CostModelEvaluationForIMC:
         self.access_same_data_considered_as_no_access = (
             access_same_data_considered_as_no_access
         )
+        self.extra_cells = extra_cells
+        self.extra_rows = extra_rows
 
         self.core_id = layer.core_allocation
         self.mem_level_list = (
@@ -458,6 +462,11 @@ class CostModelEvaluationForIMC:
                 )
                 memory_word_access[layer_op].append(memory_word_access_single)
 
+
+        # [pouya] modification made to add extra energy/latency cost for extra cells to be read
+        # [pouya] Assumes only two level stage memory!
+        memory_word_access['W'][0].wr_in_by_high += self.extra_cells
+        memory_word_access['W'][1].rd_out_to_low += self.extra_cells
         self.memory_word_access = memory_word_access
 
     ## Calculates the energy cost of this cost model evaluation by calculating the memory reading/writing energy.
@@ -563,9 +572,7 @@ class CostModelEvaluationForIMC:
         self.calc_double_buffer_flag()
         self.calc_allowed_and_real_data_transfer_cycle_per_DTL()
 
-        # TODO: [jiacong] [MODIFY] update the latency model to fit IMC requirement
         self.combine_data_transfer_rate_per_physical_port_imc()
-        # TODO: [jiacong] [FINISH]
 
         self.calc_data_loading_offloading_latency()
         self.calc_overall_latency()
@@ -818,7 +825,9 @@ class CostModelEvaluationForIMC:
         else:
             weight_loading_cycles = 0
 
-        self.SS_comb = weight_loading_cycles
+        #self.SS_comb = weight_loading_cycles
+        # [pouya] Change made to count only the extra rows that have to be written, assuming stationary weights
+        self.SS_comb = self.extra_rows
 
         # Step 3: fetch tclk information
         self.tclk = operational_array.tclk

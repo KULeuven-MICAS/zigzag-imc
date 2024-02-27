@@ -147,50 +147,51 @@ class MacroBin():
             # return the allocated columns until that point and the not allocated ones
             if len(total_bin_alloc_list) + len(new_total_bin_alloc_list) > self.D3:
                 # Update total bin alloc list with those bins that still fit in D3
-                # SORT BY VOLUME! DO NOT START ASSIGNING THE SMALLEST COLUMN ALLOCATION
                 valid_column_subsets = [[next((x for x in column_list if x.id == lx),None) for lx in y] for y in total_bin_alloc_list]
+                init_len_bin_alloc = len(total_bin_alloc_list)
+                for i in range(self.D3 - len(total_bin_alloc_list)):
+                    valid_column_subsets.append([])
                 new_total_bin_alloc = {k:[] for k in range(self.D3)}
-                while column_lite_list != []:
-                    # Create sets of columns where there are not more than one item per network column
-                    # Theoretically it should be done recursively here as well
-                    for l in column_lite_list:
-                        assigned = False
-                        for ii_bin, subset in enumerate(valid_column_subsets):
-                            if all([l.layer_index_set.intersection(x.layer_index_set) == set() for x in subset]):
-                                if sum([x.height for x in new_total_bin_alloc[ii_bin]]) + l.height < self.height:
-                                    assigned = True
-                                    new_total_bin_alloc[ii_bin].append(l)
-                                    break
-                        if not assigned:
-                            new_total_bin_alloc_list[ii_bin].append(l)
+                # Create sets of columns where there are not more than one item per network column
+                # Theoretically it should be done recursively here as well
+                # Column lite list is a list of columns still to be allocated
+                for l in column_lite_list:
+                    assigned = False
+                    # Get column corresponding to the column lite
+                    cl = next((x for x in column_list if x.id == l.id),None)
+                    # Iterate for the allocated bins
+                    for ii_bin, subset in enumerate(valid_column_subsets):
+                        # If the intersection between the layer indices of the allocated bin with the selected column is empty:
+                        if all([l.layer_index_set.intersection(x.layer_index_set) == set() for x in valid_column_subsets[self.D3 - ii_bin - 1]]):
+                            # the sum of previously allocated columns + selected column is less than height:
+                            if sum([x.height for x in new_total_bin_alloc[self.D3 - ii_bin - 1]]) + l.height <= self.height:
+                                assigned = True
+                                new_total_bin_alloc[self.D3 - ii_bin - 1].append(cl)
+                                break
+                    if not assigned:
+                        new_total_bin_alloc[self.D3 - ii_bin - 1].append(cl)
 
-
-                new_total_bin_alloc_list = valid_column_subsets
-                print('Allocation', total_bin_alloc_list)
-                print('New allocation', new_total_bin_alloc_list)
-                new_fitting_bins = new_total_bin_alloc_list[:self.D3 - len(total_bin_alloc_list)]
+                #print('Allocation', total_bin_alloc_list)
+                #print('Still to be allocated', [[x.id for x in y] for y in new_total_bin_alloc.values()])
+                #print('Still to be allocated', [[x.layer_index_set for x in y] for y in new_total_bin_alloc.values()])
+                new_fitting_bins = [[x.id for x in y] for k,y in new_total_bin_alloc.items() if init_len_bin_alloc <= k < self.D3]
                 total_bin_alloc_list += new_fitting_bins
                 column_alloc_list += [j for i in new_fitting_bins for j in i]
                 # List of columns still to be allocated
-                column_lite_list = [x for x in column_lite_list if x.id not in column_alloc_list]
-                print('Still to be allocated', [x.id for x in column_lite_list])
+                #print('New allocation', total_bin_alloc_list)
+                not_allocated_valid_column_subsets = [v for k,v in new_total_bin_alloc.items() if k < init_len_bin_alloc]
+                not_allocated_valid_column_subsets = [x for x in not_allocated_valid_column_subsets if x != []]
+                not_allocated_superitems = [list(j.superitem_set) for i in not_allocated_valid_column_subsets for j in i]
+                not_allocated_items = [list(j.item_set) for i in not_allocated_superitems for j in i]
+                not_allocated_items = [j for i in not_allocated_items for j in i]
+                #print('To be allocated', [[x.id for x in y] for y  in not_allocated_valid_column_subsets])
 
-                # Create new list of valid column allocations that do not exceed height
-                column_obj = next((x for x in column_list if x.id == column_lite_list[0].id), None)
-                not_allocated_valid_column_subsets = [[column_obj]]
-                # Create sets of columns where there are not more than one item per network column and that
-                # do not exceed network column height
-                for l in column_lite_list[1:]:
-                    assigned = False
-                    column_obj = next((x for x in column_list if x.id == l.id),None)
-                    for subset in not_allocated_valid_column_subsets:
-                        if all([l.layer_index_set.intersection(x.layer_index_set) == set() for x in subset]):
-                            if sum([x.height for x in subset]) + l.height <= self.height:
-                                assigned = True
-                                subset.append(column_obj)
-                                break
-                    if not assigned:
-                        not_allocated_valid_column_subsets.append([column_obj])
+                #print('Allocated', [[x.layer_index_set for x in y] for y in valid_column_subsets])
+                #print('To be allocated', [[x.layer_index_set for x in y] for y  in not_allocated_valid_column_subsets])
+                if [] in total_bin_alloc_list:
+                    print('Still to be allocated', [[x.layer_index_set for x in y] for y in new_total_bin_alloc.values()])
+                    print('To be allocated', [[x.layer_index_set for x in y] for y  in not_allocated_valid_column_subsets])
+                    breakpoint()
                 bin_dict =  {}
                 for i in range(self.D3):
                     column_alloc = []
@@ -202,8 +203,8 @@ class MacroBin():
                         column_alloc.sort(key=lambda x:x.actual_depth,reverse=True)
                         column_alloc = [x.id for x in column_alloc]
                     bin_dict[i] = column_alloc
-
-                return bin_dict, "UNFEASIBLE", not_allocated_valid_column_subsets
+                #print('New bin dict', bin_dict)
+                return bin_dict, "UNFEASIBLE", set(not_allocated_items)
 
             # Remove allocated columns from the global list
             total_bin_alloc_list += new_total_bin_alloc_list

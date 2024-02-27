@@ -25,7 +25,7 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     """ size=#bit, bw=(read bw, write bw), cost=(read word energy, write work energy) """
     cell_group = MemoryInstance(
         name="cell_group",
-        size=hd_param["weight_precision"] * hd_param["group_depth"],
+        size= hd_param["weight_precision"] * hd_param['group_depth'],
         r_bw=hd_param["weight_precision"],
         w_bw=hd_param["weight_precision"],
         r_cost=0,
@@ -171,7 +171,7 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     return memory_hierarchy_graph
 
 
-def imc_array_dut():
+def imc_array_dut(group_depth):
     """Multiplier array variables"""
     tech_param = { # 28nm
         "tech_node": 0.028,             # unit: um
@@ -192,7 +192,7 @@ def imc_array_dut():
         "input_precision":      8,          # activation precision expected in the hardware
         "weight_precision":     8,          # weight precision expected in the hardware
         "input_bit_per_cycle":  1,          # nb_bits of input/cycle/PE
-        "group_depth":          1,          # group depth in each PE
+        "group_depth":          group_depth,          # group depth in each PE
         "wordline_dimension": "D1",         # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension": "D2",          # hardware dimension where bitline is (corresponds to the served dimension of output regs)
         "enable_cacti":         True,       # use CACTI to estimated cell array area cost (cell array exclude build-in logic part)
@@ -212,15 +212,17 @@ def imc_array_dut():
 
     return imc_array
 
-def cores_dut():
-    imc_array1 = imc_array_dut()
+def cores_dut(group_depth):
+    imc_array1 = imc_array_dut(group_depth)
     memory_hierarchy1 = memory_hierarchy_dut(imc_array1)
 
     core1 = Core(1, imc_array1, memory_hierarchy1)
 
     return {core1}
 
+def get_accelerator(group_depth):
+    cores = cores_dut(group_depth)
+    acc_name = os.path.basename(__file__)[:-3]
+    accelerator = Accelerator(acc_name, cores)
 
-cores = cores_dut()
-acc_name = os.path.basename(__file__)[:-3]
-accelerator = Accelerator(acc_name, cores)
+    return accelerator
