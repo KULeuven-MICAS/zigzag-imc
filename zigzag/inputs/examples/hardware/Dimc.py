@@ -189,8 +189,8 @@ def imc_array_dut(group_depth):
     hd_param = {
         "pe_type":              "in_sram_computing",     # for in-memory-computing. Digital core for different values.
         "imc_type":             "digital",  # "digital" or "analog"
-        "input_precision":      8,          # activation precision expected in the hardware
-        "weight_precision":     8,          # weight precision expected in the hardware
+        "input_precision":      4,          # activation precision expected in the hardware
+        "weight_precision":     4,          # weight precision expected in the hardware
         "input_bit_per_cycle":  1,          # nb_bits of input/cycle/PE
         "group_depth":          group_depth,          # group depth in each PE
         "wordline_dimension": "D1",         # hardware dimension where wordline is (corresponds to the served dimension of input regs)

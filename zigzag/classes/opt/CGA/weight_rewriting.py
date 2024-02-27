@@ -160,9 +160,9 @@ class RewriteAllocation():
         
 
     def run(self):
-        not_allocated_si = SuperItemPool(self.not_allocated_item_pool)
+        not_allocated_si = SuperItemPool(self.not_allocated_item_pool,verbose=1)
         not_allocated_superitem_pool = not_allocated_si.generate()
-        not_allocated_column_pool = ColumnPool(D1=self.D1,D2=self.D2,network_layers=len(self.network.keys()))
+        not_allocated_column_pool = ColumnPool(D1=self.D1,D2=self.D2,network_layers=len(self.network.keys()),verbose=1)
 
         # Create a list of lists for each bin: each sublist corresponds to a column set allocation that overlaps with previous ones --> weight rewriting is required
         # Eg {0 : [[Col1], [Col2]], 1: [[Col3, Col4]]} --> for bin 0, Col1 and Col2 have to be written in separate occasions, while Col3 and Col4 can be allocated in the same bin 1

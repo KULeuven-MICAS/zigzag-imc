@@ -38,9 +38,10 @@ class ColumnLite():
 
 
 class MacroBin():
-    def __init__(self, height, number_of_macros):
+    def __init__(self, height, number_of_macros, verbose):
         self.height = height
         self.D3 = number_of_macros
+        self.verbose = verbose
 
 
     @staticmethod
@@ -224,8 +225,9 @@ class MacroBin():
                 column_alloc.sort(key=lambda x:x.actual_depth,reverse=True)
                 column_alloc = [x.id for x in column_alloc]
             bin_dict[i] = column_alloc
-
-        #logger.info(f'Generated Bins #{len(total_bin_alloc_list)}')#; Layers to be assigned: {len(column_lite_list)}')
+        
+        if self.verbose == 1:
+            logger.info(f'Generated Bins #{len(total_bin_alloc_list)}')#; Layers to be assigned: {len(column_lite_list)}')
         return bin_dict, "OPTIMAL", None
 
 

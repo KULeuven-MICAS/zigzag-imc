@@ -96,10 +96,11 @@ class SuperItemSet():
         return area
 
 class SuperItemPool():
-    def __init__(self, item_pool):
+    def __init__(self, item_pool,verbose=0):
         self.item_pool = copy.deepcopy(item_pool)
         self.superitem_pool = []
         self.height_list = np.unique([x.height for x in item_pool])
+        self.verbose = verbose
 
 
     @staticmethod
@@ -160,7 +161,8 @@ class SuperItemPool():
                 
 
         self.superitem_list = set(optimal_superitem_list)
-        #logger.info(f'Generated SuperItems #{len(optimal_superitem_list)}')
+        if self.verbose==1:
+            logger.info(f'Generated SuperItems #{len(optimal_superitem_list)}')
         return set(optimal_superitem_list)
 
 

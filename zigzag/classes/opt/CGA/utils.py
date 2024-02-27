@@ -89,6 +89,23 @@ def plot_item_allocation(layer_list, bin_dict, D3, height, D1, D2):
     fig.update_traces(showlegend=True, selector=dict(type='mesh3d'))
     fig.show()
 
+
+vgg_16_network = {
+        0: {'K':32, 'C':3,    'FX':3,'FY':3, 'OXt':1, 'OY':112, 'Ct':1, 'OX':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':1},
+        1: {'K':64, 'C':32,   'FX':3,'FY':3, 'OXt':1, 'OY':112, 'Ct':1, 'OX':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':2},
+        2: {'K':64, 'C':64,   'FX':3,'FY':3, 'OXt':1, 'OY':56,  'Ct':1, 'OX':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':3},
+        3: {'K':112, 'C':64,  'FX':3,'FY':3, 'OXt':1, 'OY':56,  'Ct':1, 'OX':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':4},
+        4: {'K':112, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':5},
+        5: {'K':112, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':6},
+        6: {'K':224, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':7},
+        7: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':8},
+        8: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':9},
+        9: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':10},
+       10: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':11},
+       11: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':12},
+       12: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':13}
+}
+
 if __name__ == "__main__":
     plot_item_allocation([], None, 1, 10)
 

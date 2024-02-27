@@ -71,13 +71,14 @@ class CGAColumn():
 
 
 class ColumnPool():
-    def __init__(self, D1, D2, network_layers):
+    def __init__(self, D1, D2, network_layers, verbose=0):
         self.width = D1
         self.depth = D2
         self.superitem_index = 0
         self.item_index = 0
         self.column_index = 0
         self.n_network_layers = network_layers
+        self.verbose = verbose
 
 
     def get_volume(self, superitem_list):
@@ -353,13 +354,15 @@ class ColumnPool():
                 bin_dict_layers[min_k].update(best_column.layer_index_set)
 
 
-#            logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+            if self.verbose == 2:
+                logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
         self.total_column_list = total_column_list
         for k in bin_dict.keys():
             if k not in new_bin_dict_allocation.keys():
                 new_bin_dict_allocation[k] = []
-        #logger.info(f'Generated Columns #{len(total_column_list)}')
+        if self.verbose == 1:
+            logger.info(f'Generated Columns #{len(total_column_list)}')
         return total_column_list, new_bin_dict_allocation
 
 
@@ -386,10 +389,12 @@ class ColumnPool():
             column_list = self.generate_columns_from_comb(best_comb)
             total_column_list += column_list
             superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
-#            logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+            if self.verbose == 2:
+                logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
 
         self.total_column_list = total_column_list
-        #logger.info(f'Generated Columns #{len(total_column_list)}')
+        if self.verbose == 1:
+            logger.info(f'Generated Columns #{len(total_column_list)}')
 
         return total_column_list
 

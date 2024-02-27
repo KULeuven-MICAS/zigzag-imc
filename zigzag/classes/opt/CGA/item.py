@@ -42,7 +42,7 @@ class Item():
 
 
 class ItemPool():
-    def __init__(self, D1, D2, network, D3, M, ox_unrolling_scheme):
+    def __init__(self, D1, D2, network, D3, M, ox_unrolling_scheme, verbose=0):
         self.D1 = D1
         self.D2 = D2
         self.D3 = D3
@@ -50,6 +50,7 @@ class ItemPool():
         self.network = network
         self.item_pool = None
         self.ox_unrolling_scheme = ox_unrolling_scheme
+        self.verbose = verbose
 
     def generate(self):
         items = []
@@ -67,6 +68,7 @@ class ItemPool():
             for k in range(len(k_pf)+1):
                 for c in itertools.combinations(k_pf,k):
                     if np.prod([x[1] for x in c]) <= self.D1 and np.prod([x[1] for x in c]) > max_d1:
+                        max_d1 = np.prod([x[1] for x in c])
                         cx = []
                         for lpf in c:
                             if lpf[0] not in [x[0] for x in cx]:
@@ -81,6 +83,7 @@ class ItemPool():
             for k in range(len(c_pf) + len(fx_pf) + len(fy_pf) + 1):
                 for c in itertools.combinations(c_pf + fx_pf + fy_pf, k):
                     if np.prod([x[1] for x in c]) <= self.D2 and np.prod([x[1] for x in c]) > max_d2:
+                        max_d2 = np.prod([x[1] for x in c])
                         cx = []
                         for lpf in c:
                             if lpf[0] not in [x[0] for x in cx]:
@@ -95,7 +98,7 @@ class ItemPool():
             item_repetition = np.prod([x for k,x in n.items() if k in ['K','FX','FY','C']]) / np.prod([x[1] for x in d1_comb + d2_comb]) * OXu
             if item_repetition > self.D3:
                 feasible_tile_configuration = False
-                return None, feasible_tile_configuration, ii_n
+                return None, feasible_tile_configuration, n['layer_id']
 
             width = np.prod([x[1] for x in d1_comb])
             depth = np.prod([x[1] for x in d2_comb])
@@ -118,10 +121,12 @@ class ItemPool():
                 d2_comb = (('C',1),)
             items.append(Item(width=int(width), depth=int(depth), height=int(n['M']), layer_index=ii_n, tile_index=int(item_repetition), \
                     D1_unroll = tuple(d1_comb), D2_unroll = tuple(d2_comb), D3_unroll = tuple(d3_comb)))
-            #logger.info(f"Generated #{len(items):4} {items[-1]}")
+            if self.verbose == 2:
+                logger.info(f"Generated #{len(items):4} {items[-1]}")
 
         self.item_pool = set(items)
-        #logger.info(f"Generated Items #{len(items):4}")
+        if self.verbose == 1:
+            logger.info(f"Generated Items #{len(items):4}")
         return set(items), feasible_tile_configuration, None
 
 
@@ -142,7 +147,8 @@ class ItemPool():
                 self.network[layer_index][pf_cut[0]] /= pf_cut[1]
                 self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 self.network[layer_index][f'M'] *= pf_cut[1]
-                #logger.info(f'Mapping update: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
+                if self.verbose == 2:
+                    logger.info(f'Mapping update: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
 
         for layer_index, layer in self.network.items():
             fitting = False
@@ -157,7 +163,8 @@ class ItemPool():
                 self.network[layer_index][pf_cut[0]] /= pf_cut[1]
                 self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 self.network[layer_index][f'M'] *= pf_cut[1]
-                #logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
+                if self.verbose == 2:
+                    logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
 
         feasible_configuration = False
         if any([x['M'] > self.M for x in self.network.values()]):
@@ -176,7 +183,7 @@ class ItemPool():
         for layer_index, layer in self.network.items():
             latency.append(layer['OXt'] * layer['OY'] * layer['Ct'] * layer['FXt'] * layer['FYt'] * layer['Kt'])
             weight_area.append(layer['C'] * layer['K'] * layer['FX'] * layer['FY'] * layer['OX'])
-            vals.append({'network_index':layer_index,'latency':latency[-1],'weight_area':weight_area[-1]})
+            vals.append({'network_index':layer['layer_id'],'latency':latency[-1],'weight_area':weight_area[-1]})
         df = pd.DataFrame(vals)
         df = df.sort_values(by=['latency','weight_area'],ascending=[True,False],ignore_index=True)
         feasible_configuration = False
@@ -187,6 +194,7 @@ class ItemPool():
                 if target_layer_index != target_layer_index_r:
                     continue
             network_copy = copy.deepcopy(self.network)
+            target_layer_index = next((k for k,v in self.network.items() if v['layer_id'] == target_layer_index),None)
             k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
             c_pf = [('C',x) for x in prime_factors(self.network[target_layer_index]['C'])]
             fx_pf = [('FX',x) for x in prime_factors(self.network[target_layer_index]['FX'])]
@@ -200,7 +208,8 @@ class ItemPool():
                 network_copy[target_layer_index][pf_cut[0]] /= pf_cut[1]
                 network_copy[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 network_copy[target_layer_index][f'M'] *= pf_cut[1]
-                #logger.info(f'Mapping update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
+                if self.verbose == 2:
+                    logger.info(f'Mapping update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
             else:
                 pf = c_pf + fx_pf + fy_pf  
                 pf.sort(key = lambda x: x[1])
@@ -208,7 +217,8 @@ class ItemPool():
                 network_copy[target_layer_index][pf_cut[0]] /= pf_cut[1]
                 network_copy[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
                 network_copy[target_layer_index][f'M'] *= pf_cut[1]
-                #logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
+                if self.verbose == 2:
+                    logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
 
             if any([x['M'] > self.M for x in network_copy.values()]):
                 continue
@@ -216,5 +226,4 @@ class ItemPool():
                 self.network = network_copy
                 feasible_configuration = True
                 return feasible_configuration
-
         return feasible_configuration

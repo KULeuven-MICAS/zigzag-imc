@@ -19,7 +19,8 @@ from zigzag.classes.opt.CGA.superitem import *
 from zigzag.classes.opt.CGA.macro_bin import MacroBin
 from zigzag.classes.opt.CGA.column import *
 from zigzag.classes.opt.CGA.weight_rewriting import RewriteAllocation
-from zigzag.classes.opt.CGA.utils import plot_item_allocation, prime_factors
+from zigzag.classes.opt.CGA.utils import plot_item_allocation, prime_factors, vgg_16_network
+
 
 
 
@@ -35,14 +36,17 @@ class WeightPackingStage(Stage):
 
 
     def weight_tile_allocation(self, ox_unrolling_scheme):
-        #ox_unrolling_scheme = [(0,4),(1,2)]
         network = self.extract_network_from_workload()
+        network = vgg_16_network
         solver_status = ""
         D1, D2, D3, M = self.get_IMC_dimension_parameters() 
         kwargs = self.kwargs.copy()
 
-        itempool = ItemPool(D1=D1,D2=D2,D3=D3,M=M,network=network, ox_unrolling_scheme=ox_unrolling_scheme)
-        itempool.set_init_M()
+        itempool = ItemPool(D1=D1,D2=D2,D3=D3,M=M,network=network, ox_unrolling_scheme=ox_unrolling_scheme,verbose=1)
+        feasible_cfg = itempool.set_init_M()
+        if not feasible_cfg:
+            logger.error('>>>> Unfeasible settings for D1,D2,D3,M <<<<')
+            return [], False, 0
         oxu_scheme_str =[f"L{x[0]} OXu {x[1]}" for x in ox_unrolling_scheme] 
         logger.info(f'OX unrolling scheme {oxu_scheme_str}')
         item_pool, feasible_tile_configuration, target_layer_index = itempool.generate()
@@ -55,25 +59,28 @@ class WeightPackingStage(Stage):
             logger.error('>>>> Unfeasible settings for D1,D2,D3,M <<<<')
             return [], False, 0
         cost_list_iterations = []
-        best_cost, cost, weight_writing_cost = float('inf'), float('inf'), float('inf')
+        # [EDIT FOR ISSCC VALIDATION]
+        #best_cost, cost, weight_writing_cost = float('inf'), float('inf'), float('inf')
+        best_cost, cost, weight_writing_cost = 0,0,0 #float('inf'), float('inf'), float('inf')
         first_iteration = True
         while solver_status not in ['OPTIMAL','FEASIBLE']:
         #    logger.info("===== ItemPool Generation =====")
-            si = SuperItemPool(item_pool)
+            si = SuperItemPool(item_pool,verbose=1)
         #    logger.info("===== SuperItemPool Generation =====")
             superitem_pool = si.generate()
         #    logger.info("===== ColumnPool Generation =====")
-            column_pool = ColumnPool(D1=D1,D2=D2, network_layers=len(network.keys()))
+            column_pool = ColumnPool(D1=D1,D2=D2, network_layers=len(network.keys()),verbose=1)
             column_list = column_pool.generate(superitem_pool)
         #    logger.info("===== Bin Allocation =====")
-            macro_bin = MacroBin(height=M, number_of_macros=D3)
+            macro_bin = MacroBin(height=M, number_of_macros=D3,verbose=1)
             bin_dict, solver_status, not_allocated_item_pool = macro_bin.macro_allocation(column_list)
             #bin_dict, solver_status = macro_bin.pack_macrobin(column_list, fsi, zsl, ol, nki)
-            self.generate_mappings(network, item_pool)
+            #self.generate_mappings(network, item_pool)
             if solver_status in ['OPTIMAL','FEASIBLE']:
         #        plot_item_allocation(column_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
                 utilization = self.get_utilization(item_pool) / D1 / D2 / D3 / M
-                cost = self.get_cost(kwargs, {},{})
+                # [EDIT FOR ISSCC VALIDATION]
+                cost = utilization #self.get_cost(kwargs, {},{})
                 cost_list_iterations.append(['Allocated',cost])
                 logger.info(f'Allocation cost: {cost:.2e}')
                 logger.info(f'>>>> Completed allocation <<<< Utilization {utilization*100:.2f}%')
@@ -86,15 +93,20 @@ class WeightPackingStage(Stage):
                     # Allocate remaining items
                     ra = RewriteAllocation(bin_dict, column_list, not_allocated_item_pool, network, D1, D2, D3, M)
                     # Estimate cost of rewriting
-                    extra_cells, extra_rows = ra.run()
-                    weight_writing_cost = self.get_cost(kwargs, extra_cells, extra_rows)
+                    logger.info(f'Running weight rewriting allocation for {len(not_allocated_item_pool)} items...')
+                    # [EDIT FOR ISSCC VALIDATION]
+                    #extra_cells, extra_rows = ra.run()
+                    #weight_writing_cost = self.get_cost(kwargs, extra_cells, extra_rows)
                     #logger.info(f'Extra cells per layer:{extra_cells}')
                     #logger.info(f'Extra rows per layer:{extra_rows}')
                     w_utilization = self.get_utilization(item_pool) / D1 / D2 / D3 / M
+                    weight_writing_cost = w_utilization
                     logger.info(f'Weight rewriting cost: {weight_writing_cost:.3e}, Utilization {w_utilization*100:.2f}%')
 
                     cost_list_iterations.append(['Weight writing',weight_writing_cost])
                     first_iteration = False
+                    # [EDIT FOR ISSCC VALIDATION]
+                    break
                 # Fold M and estimate cost
                 feasible_configuration = itempool.update_mapping()
                 if not feasible_configuration:
@@ -122,7 +134,9 @@ class WeightPackingStage(Stage):
                 logger.error('>>>> Unfeasible settings for D1,D2,D3,M <<<<')
                 return [], False, 0
 
-        if cost < weight_writing_cost:
+        # [EDIT FOR ISSCC VALIDATION]
+        #if cost < weight_writing_cost:
+        if cost > weight_writing_cost:
             best_cost = cost
         else:
             best_cost = weight_writing_cost
@@ -149,7 +163,7 @@ class WeightPackingStage(Stage):
     def run(self):
 
         network = self.extract_network_from_workload()
-        breakpoint()
+        network = vgg_16_network
         valid_ox_unrolling_scheme = []
         valid_ox_unrolling_scheme_df = []
         cme_list = []
@@ -172,8 +186,10 @@ class WeightPackingStage(Stage):
                 ox_unrolling_scheme_list = [[x[0]] + x[1] for x in ox_unrolling_scheme_list]
             for ox_unrolling_scheme in ox_unrolling_scheme_list:
                 cme, feasible, utilization = self.weight_tile_allocation(ox_unrolling_scheme)
-                if not feasible:
-                    break
+
+                # [EDIT FOR ISSCC VALIDATION]
+                #if not feasible:
+                #    break
                 valid_ox_unrolling_scheme_df.append({'cost':cme, 'OXu':ox_unrolling_scheme, 'utilization':utilization})
                 valid_ox_unrolling_scheme.append(ox_unrolling_scheme)
 
