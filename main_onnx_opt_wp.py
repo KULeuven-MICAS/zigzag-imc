@@ -11,10 +11,10 @@ d1_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_modifier = 'set_array_dim', target_range = np.array([1]))
 d2_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',1)],
-                target_modifier = 'set_array_dim', target_range = np.array([64]))
+                target_modifier = 'set_array_dim', target_range = np.array([64*4]))
 d3_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array'), tID('obj','dimensions'), tID('list',2)],
-                target_modifier = 'set_array_dim', target_range = np.array([256]))
+                target_modifier = 'set_array_dim', target_range = np.array([64]))
 g_target = OptimizerTarget(target_stage = 'AcceleratorParserStage',
                 target_object = [tID('object','accelerator'), tID('obj','cores'), tID('list',0), tID('obj','operational_array')],
                 target_modifier = 'set_group_depth', target_range = np.array([32]))

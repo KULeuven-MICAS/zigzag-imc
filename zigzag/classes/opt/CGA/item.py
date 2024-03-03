@@ -78,7 +78,6 @@ class ItemPool():
                                 lpfx[1] *= lpf[1]
                         cx = tuple([tuple(x) for x in cx])
                         d1_comb = cx
-                        
             
             for k in range(len(c_pf) + len(fx_pf) + len(fy_pf) + 1):
                 for c in itertools.combinations(c_pf + fx_pf + fy_pf, k):
@@ -98,7 +97,7 @@ class ItemPool():
             item_repetition = np.prod([x for k,x in n.items() if k in ['K','FX','FY','C']]) / np.prod([x[1] for x in d1_comb + d2_comb]) * OXu
             if item_repetition > self.D3:
                 feasible_tile_configuration = False
-                return None, feasible_tile_configuration, n['layer_id']
+                return None, feasible_tile_configuration, (n['layer_id'], d1_comb, d2_comb, OXu)
 
             width = np.prod([x[1] for x in d1_comb])
             depth = np.prod([x[1] for x in d2_comb])
@@ -113,8 +112,8 @@ class ItemPool():
                 if lp != None:
                     d3_comb.append((loop_type, n[loop_type] / lp[1]))
             d3_comb.append(('OX',OXu))
-            self.network[ii_n]['OXt'] = self.network[ii_n]['OX'] / OXu
-            self.network[ii_n]['OX'] = OXu
+#            self.network[ii_n]['OXt'] = int(self.network[ii_n]['OX'] / OXu)
+#            self.network[ii_n]['OX'] = OXu
             if d1_comb == tuple():
                 d1_comb = (('K',1),)
             if d2_comb == tuple():
@@ -130,9 +129,18 @@ class ItemPool():
         return set(items), feasible_tile_configuration, None
 
 
-    def set_init_M(self):
+    def set_init_M(self, ox_unrolling_scheme):
+
+        
+        # Make sure that C, FX, FY fit in D2 * D3
         for layer_index, layer in self.network.items():
             fitting = False
+            if layer_index in [x[0] for x in ox_unrolling_scheme]:
+                oxu = next((x for x in ox_unrolling_scheme if x[0] == layer_index),None)
+                self.network[layer_index]['OXt'] = self.network[layer_index]['OXt'] / oxu[1]
+                self.network[layer_index]['OX'] = oxu[1]
+
+
             while not fitting:
                 if np.prod([layer['FX'] * layer['FY'] * layer['C']]) <= self.D2 * self.D3:
                     fitting = True
@@ -174,9 +182,91 @@ class ItemPool():
             return feasible_configuration
 
 
-    
+    def update_mapping2(self, target_layer_index_r=None):
+        d1_comb = target_layer_index_r[1]
+        d1_comb_extended, d2_comb_extended = [], []
+
+        for c in d1_comb:
+            c_pf = prime_factors(c[1])
+            for c_prime_factor in c_pf:
+                d1_comb_extended.append((c[0],int(c_prime_factor)))
+        d2_comb = target_layer_index_r[2]
+        for c in d2_comb:
+            c_pf = prime_factors(c[1])
+            for c_prime_factor in c_pf:
+                d2_comb_extended.append((c[0],int(c_prime_factor)))
+        oxu = target_layer_index_r[3]
+        target_layer_index_r = target_layer_index_r[0]
+
+        feasible_configuration = False
+
+        network_copy = copy.deepcopy(self.network)
+        target_layer_index = next((k for k,v in self.network.items() if v['layer_id'] == target_layer_index_r),None)
+        k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
+        c_pf = [('C',x) for x in prime_factors(self.network[target_layer_index]['C'])]
+        fx_pf = [('FX',x) for x in prime_factors(self.network[target_layer_index]['FX'])]
+        fy_pf = [('FY',x) for x in prime_factors(self.network[target_layer_index]['FY'])]
+
+        # Find best D3 comb, including OXu in the unrollings
+        # Prioritize C, FX, FY loops
+
+        # clean c_pf, fx_pf, fy_pf based on D1_comb
+        for d2_cpf in d2_comb_extended:
+            if d2_cpf[0] == 'C':
+                c_pf.remove(('C',d2_cpf[1]))
+            if d2_cpf[0] == 'FX':
+                fx_pf.remove(('FX',d2_cpf[1]))
+            if d2_cpf[0] == 'FY':
+                fy_pf.remove(('FY',d2_cpf[1]))
+        for d1_cpf in d1_comb_extended:
+            k_pf.remove(('K',d1_cpf[1]))
+        oxu_loop = ('OX',oxu)
+        max_utilization = 0
+        d3_comb = [oxu_loop]
+        for k in range(len(c_pf + fx_pf + fy_pf)+1):
+            for comb in itertools.combinations(c_pf + fx_pf + fy_pf,k):
+                if oxu * np.prod([c[1] for c in comb]) <= self.D3 and oxu * np.prod([c[1] for c in comb]) > max_utilization:
+                    max_utilization = oxu * np.prod([c[1] for c in comb])
+                    cx = [oxu_loop] + [tuple(x) for x in comb]
+                    d3_comb = cx
+        d3_len = np.prod([c[1] for c in d3_comb])
+        d3_comb_new = copy.deepcopy(d3_comb)
+        for k in range(len(k_pf)+1):
+            for comb in itertools.combinations(k_pf, k):
+                if d3_len * np.prod([c[1] for c in comb]) <= self.D3 and d3_len * np.prod([c[1] for c in comb]) > max_utilization:
+                    max_utilization = d3_len * np.prod([c[1] for c in comb])
+                    cx = d3_comb + [tuple(x) for x in comb]
+                    d3_comb_new = cx
+
+        d3_comb = d3_comb_new
+        for d3_cpf in d3_comb:
+            if d3_cpf[0] == 'C':
+                c_pf.remove(('C',d3_cpf[1]))
+            if d3_cpf[0] == 'FX':
+                fx_pf.remove(('FX',d3_cpf[1]))
+            if d3_cpf[0] == 'FY':
+                fy_pf.remove(('FY',d3_cpf[1]))
+            if d3_cpf[0] == 'K':
+                k_pf.remove(('K',d3_cpf[1]))
+
+        for pf in c_pf + fx_pf + fy_pf + k_pf:
+            network_copy[target_layer_index][pf[0]] /= pf[1]
+            network_copy[target_layer_index][f'{pf[0]}t'] *= pf[1]
+            network_copy[target_layer_index][f'M'] *= pf[1]
+
+        if any([x['M'] > self.M for x in network_copy.values()]):
+            return feasible_configuration, None
+        else:
+            self.network = network_copy
+            feasible_configuration = True
+            return feasible_configuration, (d1_comb, d2_comb, d3_comb)
+        return feasible_configuration   
 
     def update_mapping(self, target_layer_index_r=None):
+        d1_comb = target_layer_index_r[1]
+        d2_comb = target_layer_index_r[2]
+        target_layer_index_r = target_layer_index_r[0]
+
         latency = []
         weight_area = []
         vals = []

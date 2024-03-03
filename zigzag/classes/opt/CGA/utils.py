@@ -91,20 +91,36 @@ def plot_item_allocation(layer_list, bin_dict, D3, height, D1, D2):
 
 
 vgg_16_network = {
-        0: {'K':32, 'C':3,    'FX':3,'FY':3, 'OXt':1, 'OY':112, 'Ct':1, 'OX':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':1},
-        1: {'K':64, 'C':32,   'FX':3,'FY':3, 'OXt':1, 'OY':112, 'Ct':1, 'OX':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':2},
-        2: {'K':64, 'C':64,   'FX':3,'FY':3, 'OXt':1, 'OY':56,  'Ct':1, 'OX':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':3},
-        3: {'K':112, 'C':64,  'FX':3,'FY':3, 'OXt':1, 'OY':56,  'Ct':1, 'OX':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':4},
-        4: {'K':112, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':5},
-        5: {'K':112, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':6},
-        6: {'K':224, 'C':112, 'FX':3,'FY':3, 'OXt':1, 'OY':28,  'Ct':1, 'OX':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':7},
-        7: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':8},
-        8: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':9},
-        9: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':14,  'Ct':1, 'OX':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':10},
-       10: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':11},
-       11: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':12},
-       12: {'K':224, 'C':224, 'FX':3,'FY':3, 'OXt':1, 'OY':7,   'Ct':1, 'OX':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':13}
+        0: {'K':32, 'C':3,    'FX':3,'FY':3, 'OX':1, 'OYt':112, 'Ct':1, 'OXt':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':1},
+        1: {'K':64, 'C':32,   'FX':3,'FY':3, 'OX':1, 'OYt':112, 'Ct':1, 'OXt':112, 'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':2},
+        2: {'K':64, 'C':64,   'FX':3,'FY':3, 'OX':1, 'OYt':56,  'Ct':1, 'OXt':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':3},
+        3: {'K':112, 'C':64,  'FX':3,'FY':3, 'OX':1, 'OYt':56,  'Ct':1, 'OXt':56,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':4},
+        4: {'K':112, 'C':112, 'FX':3,'FY':3, 'OX':1, 'OYt':28,  'Ct':1, 'OXt':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':5},
+        5: {'K':112, 'C':112, 'FX':3,'FY':3, 'OX':1, 'OYt':28,  'Ct':1, 'OXt':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':6},
+        6: {'K':224, 'C':112, 'FX':3,'FY':3, 'OX':1, 'OYt':28,  'Ct':1, 'OXt':28,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':7},
+        7: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':14,  'Ct':1, 'OXt':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':8},
+        8: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':14,  'Ct':1, 'OXt':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':9},
+        9: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':14,  'Ct':1, 'OXt':14,  'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':10},
+       10: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':7,   'Ct':1, 'OXt':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':11},
+       11: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':7,   'Ct':1, 'OXt':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':12},
+       12: {'K':224, 'C':224, 'FX':3,'FY':3, 'OX':1, 'OYt':7,   'Ct':1, 'OXt':7,   'FXt':1, 'FYt':1, 'Kt':1, 'M': 1, 'layer_id':13}
 }
+vgg_16_network_validation = {
+        0: {'K':1, 'C':3,    'FX':3,'FY':3, 'OX':1,  'OYt':112, 'Ct':1,  'OXt':112, 'FXt':1, 'FYt':1, 'Kt':32, 'M': 32, 'layer_id':1},
+        1: {'K':2, 'C':32,   'FX':3,'FY':3, 'OX':1,  'OYt':112, 'Ct':1,  'OXt':112, 'FXt':1, 'FYt':1, 'Kt':32, 'M': 32, 'layer_id':2},
+        2: {'K':2, 'C':64,   'FX':3,'FY':3, 'OX':1,  'OYt':56,  'Ct':1,  'OXt':56, 'FXt':1, 'FYt':1, 'Kt':32, 'M': 32, 'layer_id':3},
+        3: {'K':4, 'C':64,   'FX':3,'FY':3, 'OX':1,  'OYt':56,  'Ct':1,  'OXt':56, 'FXt':1, 'FYt':1,  'Kt':28, 'M': 28, 'layer_id':4},
+        4: {'K':4, 'C':112,  'FX':3,'FY':3, 'OX':1,  'OYt':28,  'Ct':1,  'OXt':28, 'FXt':1, 'FYt':1,  'Kt':28, 'M': 28, 'layer_id':5},
+        5: {'K':4, 'C':112,  'FX':3,'FY':3, 'OX':1,  'OYt':28,  'Ct':1,  'OXt':28, 'FXt':1, 'FYt':1,  'Kt':28, 'M': 28, 'layer_id':6},
+        6: {'K':8, 'C':112,  'FX':3,'FY':3, 'OX':1,  'OYt':28,  'Ct':1,  'OXt':28, 'FXt':1, 'FYt':1,  'Kt':28, 'M': 28, 'layer_id':7},
+        7: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':14,  'Ct':1,  'OXt':14, 'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':8},
+        8: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':14,  'Ct':1,  'OXt':14, 'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':9},
+        9: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':14,  'Ct':1,  'OXt':14, 'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':10},
+       10: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':7,   'Ct':1,  'OXt':7,  'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':11},
+       11: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':7,   'Ct':1,  'OXt':7,  'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':12},
+       12: {'K':8, 'C':224,  'FX':3,'FY':3, 'OX':1,  'OYt':7,   'Ct':1,  'OXt':7,  'FXt':1, 'FYt':1,  'Kt':32, 'M': 32, 'layer_id':13}
+}
+
 
 if __name__ == "__main__":
     plot_item_allocation([], None, 1, 10)
