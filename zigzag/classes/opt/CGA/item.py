@@ -108,9 +108,10 @@ class ItemPool():
                     comb = d2_comb
                 else:
                     comb = d1_comb
-                lp = next((x for x in comb if x[0] == loop_type),None)
+                lp = next((x for x in comb if x[0] == loop_type),(loop_type,1))
                 if lp != None:
-                    d3_comb.append((loop_type, n[loop_type] / lp[1]))
+                    if int(n[loop_type] / lp[1]) != 1:
+                        d3_comb.append((loop_type, int(n[loop_type] / lp[1])))
             d3_comb.append(('OX',OXu))
 #            self.network[ii_n]['OXt'] = int(self.network[ii_n]['OX'] / OXu)
 #            self.network[ii_n]['OX'] = OXu
@@ -202,10 +203,10 @@ class ItemPool():
 
         network_copy = copy.deepcopy(self.network)
         target_layer_index = next((k for k,v in self.network.items() if v['layer_id'] == target_layer_index_r),None)
-        k_pf = [('K',x) for x in prime_factors(self.network[target_layer_index]['K'])]
-        c_pf = [('C',x) for x in prime_factors(self.network[target_layer_index]['C'])]
-        fx_pf = [('FX',x) for x in prime_factors(self.network[target_layer_index]['FX'])]
-        fy_pf = [('FY',x) for x in prime_factors(self.network[target_layer_index]['FY'])]
+        k_pf = [('K',int(x)) for x in prime_factors(self.network[target_layer_index]['K'])]
+        c_pf = [('C',int(x)) for x in prime_factors(self.network[target_layer_index]['C'])]
+        fx_pf = [('FX',int(x)) for x in prime_factors(self.network[target_layer_index]['FX'])]
+        fy_pf = [('FY',int(x)) for x in prime_factors(self.network[target_layer_index]['FY'])]
 
         # Find best D3 comb, including OXu in the unrollings
         # Prioritize C, FX, FY loops
@@ -227,7 +228,7 @@ class ItemPool():
             for comb in itertools.combinations(c_pf + fx_pf + fy_pf,k):
                 if oxu * np.prod([c[1] for c in comb]) <= self.D3 and oxu * np.prod([c[1] for c in comb]) > max_utilization:
                     max_utilization = oxu * np.prod([c[1] for c in comb])
-                    cx = [oxu_loop] + [tuple(x) for x in comb]
+                    cx = [oxu_loop] + [tuple([x[0],int(x[1])]) for x in comb]
                     d3_comb = cx
         d3_len = np.prod([c[1] for c in d3_comb])
         d3_comb_new = copy.deepcopy(d3_comb)
@@ -235,7 +236,7 @@ class ItemPool():
             for comb in itertools.combinations(k_pf, k):
                 if d3_len * np.prod([c[1] for c in comb]) <= self.D3 and d3_len * np.prod([c[1] for c in comb]) > max_utilization:
                     max_utilization = d3_len * np.prod([c[1] for c in comb])
-                    cx = d3_comb + [tuple(x) for x in comb]
+                    cx = d3_comb + [tuple([x[0],int(x[1])]) for x in comb]
                     d3_comb_new = cx
 
         d3_comb = d3_comb_new
@@ -263,9 +264,10 @@ class ItemPool():
         return feasible_configuration   
 
     def update_mapping(self, target_layer_index_r=None):
-        d1_comb = target_layer_index_r[1]
-        d2_comb = target_layer_index_r[2]
-        target_layer_index_r = target_layer_index_r[0]
+        if target_layer_index_r != None:
+            d1_comb = target_layer_index_r[1]
+            d2_comb = target_layer_index_r[2]
+            target_layer_index_r = target_layer_index_r[0]
 
         latency = []
         weight_area = []

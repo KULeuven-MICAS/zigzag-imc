@@ -36,7 +36,23 @@ class WeightPackingStage(Stage):
 
 
     def weight_tile_allocation(self, ox_unrolling_scheme):
+        ox_unrolling_scheme = [(0,16),
+                (1,16),
+                (2,8),
+                (3,4),
+                (4,4),
+                (5,4),
+                (6,2),
+                (7,1),
+                (8,1),
+                (9,1),
+                (10,1),
+                (11,1),
+                (12,1)]
+
+
         network = self.extract_network_from_workload()
+        network = copy.deepcopy(vgg_16_network_validation)
         solver_status = ""
         D1, D2, D3, M = self.get_IMC_dimension_parameters() 
         kwargs = self.kwargs.copy()
@@ -74,12 +90,12 @@ class WeightPackingStage(Stage):
             macro_bin = MacroBin(height=M, number_of_macros=D3,verbose=0)
             bin_dict, solver_status, not_allocated_item_pool = macro_bin.macro_allocation(column_list)
             #bin_dict, solver_status = macro_bin.pack_macrobin(column_list, fsi, zsl, ol, nki)
-            self.generate_mappings(network, item_pool)
+            #self.generate_mappings(network, item_pool)
             if solver_status in ['OPTIMAL','FEASIBLE']:
         #        plot_item_allocation(column_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
-                #utilization = self.get_utilization(item_pool) / D1 / D2 / D3 
-                cost, cme_list = self.get_cost(kwargs, {},{})
-                utilization = self.get_utilization_weighted(item_pool, cme_list, D1, D2, D3)
+                utilization = self.get_utilization(item_pool) / D1 / D2 / D3 / M
+                # [EDIT FOR ISSCC VALIDATION]
+                cost = self.get_cost(kwargs, {},{})
                 cost_list_iterations.append(['Allocated',cost])
                 logger.info(f'Allocation cost: {cost:.2e}')
                 logger.info(f'>>>> Completed allocation <<<< Utilization {utilization*100:.2f}%')
@@ -90,17 +106,22 @@ class WeightPackingStage(Stage):
                     allocated_columns = [j for i in [v for v in bin_dict.values()] for j in i]
                     column_list = [x for x in column_list if x.id in allocated_columns]
                     # Allocate remaining items
-                    ra = RewriteAllocation(bin_dict, column_list, not_allocated_item_pool, network, D1, D2, D3, M)
+                    #ra = RewriteAllocation(bin_dict, column_list, not_allocated_item_pool, network, D1, D2, D3, M)
                     # Estimate cost of rewriting
-                    logger.info(f'Running weight rewriting allocation for {len(not_allocated_item_pool)} items...')
-                    extra_cells, extra_rows = ra.run()
-                    logger.info(f'Extra cells per layer:{extra_cells}')
-                    logger.info(f'Extra rows per layer:{extra_rows}')
-                    weight_writing_cost, cme_list = self.get_cost(kwargs, extra_cells, extra_rows)
-                    w_utilization = self.get_utilization(item_pool) / D1 / D2 / D3 
+                    #logger.info(f'Running weight rewriting allocation for {len(not_allocated_item_pool)} items...')
+                    # [EDIT FOR ISSCC VALIDATION]
+                    #extra_cells, extra_rows = ra.run()
+                    #logger.info(f'Extra cells per layer:{extra_cells}')
+                    #logger.info(f'Extra rows per layer:{extra_rows}')
+#                    weight_writing_cost = self.get_cost(kwargs, extra_cells, extra_rows)
+                    weight_writing_cost, cost_dict = self.get_isscc_cost(kwargs, itempool.network, ox_unroll_combs)
+                    w_utilization = self.get_utilization(item_pool) / D1 / D2 / D3 / M
                     logger.info(f'Weight rewriting cost: {weight_writing_cost:.3e}, Utilization {w_utilization*100:.2f}%')
+                    print(cost_dict)
+
                     cost_list_iterations.append(['Weight writing',weight_writing_cost])
                     first_iteration = False
+                    break
                 # Fold M and estimate cost
                 feasible_configuration = itempool.update_mapping()
                 if not feasible_configuration:
@@ -168,26 +189,16 @@ class WeightPackingStage(Stage):
         for cme, (layer, extra_info) in sub_stage.run():
             cme_list.append(cme)
         cost = sum([x.energy_total * x.latency_total0 for x in cme_list])
-        return cost, cme_list
+        return cost
 
     
     def get_utilization(self, item_pool):
-        return sum([x.area * x.tile_index for x in item_pool])
-
-    def get_utilization_weighted(self, item_pool, cme_list, D1,D2,D3):
-        total_latency = 0
-        ut = 0
-        for ii_layer, cme in enumerate(cme_list):
-            latency = cme.latency_total0
-            total_latency += latency
-            layer_items = [x for x in item_pool if x.layer_index == ii_layer]
-            ut += sum([x.area * x.tile_index for x in layer_items]) * latency / (D1 * D2 * D3)
-
-        return ut / total_latency 
+        return sum([x.volume * x.tile_index for x in item_pool])
     
     def run(self):
 
         network = self.extract_network_from_workload()
+        network = vgg_16_network
         valid_ox_unrolling_scheme = []
         valid_ox_unrolling_scheme_df = []
         cme_list = []
@@ -206,24 +217,35 @@ class WeightPackingStage(Stage):
             ox_comb.sort()
             ox_comb = [(layer_index, x) for x in ox_comb] 
             # [EDIT] ISSCC validation
-            if valid_ox_unrolling_scheme == []:
-                ox_unrolling_scheme_list = [[x] for x in ox_comb]
-            else:
-                ox_unrolling_scheme_list = itertools.product(*[ox_comb, valid_ox_unrolling_scheme])
-                ox_unrolling_scheme_list = [[x[0]] + x[1] for x in ox_unrolling_scheme_list]
-            for ox_unrolling_scheme in ox_unrolling_scheme_list:
-                cme, feasible, utilization, cost_dict = self.weight_tile_allocation(ox_unrolling_scheme)
+#            if valid_ox_unrolling_scheme == []:
+#                ox_unrolling_scheme_list = [[x] for x in ox_comb]
+#            else:
+#                ox_unrolling_scheme_list = itertools.product(*[ox_comb, valid_ox_unrolling_scheme])
+#                ox_unrolling_scheme_list = [[x[0]] + x[1] for x in ox_unrolling_scheme_list]
+#            for ox_unrolling_scheme in ox_unrolling_scheme_list:
+            best_ox_unroll = best_ox_unroll_new
+            for ox_c in ox_comb:
+                if ox_c[1] == 112:
+                    continue
+                best_ox_unroll_cp = copy.deepcopy(best_ox_unroll)
+                best_ox_unroll_cp.append(ox_c)
+                # [EDIT] ISSCC validation
+                #cme, feasible, utilization, cost_dict = self.weight_tile_allocation(ox_unrolling_scheme)
+                cme, feasible, utilization, cost_dict = self.weight_tile_allocation(best_ox_unroll_cp)
 
+                # [EDIT FOR ISSCC VALIDATION]
                 if not feasible:
                     break
-                valid_ox_unrolling_scheme_df.append({'cost':cme, 'OXu':ox_unrolling_scheme, 'utilization':cost_dict})
-                valid_ox_unrolling_scheme.append(ox_unrolling_scheme)
+                #valid_ox_unrolling_scheme_df.append({'cost':cme, 'OXu':ox_unrolling_scheme, 'utilization':cost_dict})
+                valid_ox_unrolling_scheme_df.append({'cost':cme, 'OXu':best_ox_unroll_cp, 'utilization':cost_dict})
+                #valid_ox_unrolling_scheme.append(ox_unrolling_scheme)
+                valid_ox_unrolling_scheme.append(best_ox_unroll_cp)
 
                 # Heuristic introduced to avoid evaluating suboptimal OX unrollings
                 if cme < min_cost:
-                    #best_ox_unroll_new = copy.deepcopy(best_ox_unroll_cp)
+                    best_ox_unroll_new = copy.deepcopy(best_ox_unroll_cp)
                     min_cost = cme
-                    cme_list.append((ox_unrolling_scheme, cme,cost_dict))
+                    cme_list.append((best_ox_unroll_cp,cme,cost_dict))
 
         cme_list.sort(key=lambda x: x[1])
         breakpoint()
@@ -263,7 +285,7 @@ class WeightPackingStage(Stage):
             loop_dim_size = layer.layer_attrs['loop_dim_size']
             new_layer = copy.deepcopy(base_layer)
             for k,v in loop_dim_size.items():
-                if k in ['OX']:
+                if k in ['OX','OY']:
                     new_layer[f'{k}t'] = v
                 else:
                     new_layer[k] = v
@@ -271,6 +293,7 @@ class WeightPackingStage(Stage):
             network[i] = new_layer
 
             i += 1
+
         return network
 
 

@@ -185,6 +185,21 @@ class MacroBin():
                 not_allocated_superitems = [list(j.superitem_set) for i in not_allocated_valid_column_subsets for j in i]
                 not_allocated_items = [list(j.item_set) for i in not_allocated_superitems for j in i]
                 not_allocated_items = [j for i in not_allocated_items for j in i]
+
+                # Not allocated items: many items identical with different tile index
+                # Make tile index a list instead
+                not_allocated_items_clean = []
+                for nai in not_allocated_items:
+                    nai_copy = copy.deepcopy(nai)
+                    if any([x.layer_index == nai.layer_index for x in not_allocated_items_clean]):
+                        nai_original = next((x for x in not_allocated_items_clean if x.layer_index == nai.layer_index),None)
+                        nai_original.tile_index.append(nai.tile_index)
+                    else:
+                        nai_copy.tile_index = [nai.tile_index]
+                        not_allocated_items_clean.append(nai_copy)
+
+
+
                 #print('To be allocated', [[x.id for x in y] for y  in not_allocated_valid_column_subsets])
 
                 #print('Allocated', [[x.layer_index_set for x in y] for y in valid_column_subsets])

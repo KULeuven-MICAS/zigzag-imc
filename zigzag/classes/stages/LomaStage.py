@@ -34,6 +34,7 @@ class LomaStage(Stage):
         self.engine = None
 
     def run(self):
+
         self.engine = LomaEngine(
             accelerator=self.accelerator,
             layer=self.layer,

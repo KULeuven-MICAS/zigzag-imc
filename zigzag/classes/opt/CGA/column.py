@@ -164,8 +164,13 @@ class ColumnPool():
         num_columns = float('inf')
         for si in comb:
             for i in si.item_set:
-                if i.tile_index < num_columns:
-                    num_columns = i.tile_index
+                if isinstance(i.tile_index, int):
+                    if i.tile_index < num_columns:
+                        num_columns = i.tile_index
+                if isinstance(i.tile_index, list):
+                    if len(i.tile_index) < num_columns:
+                        num_columns = len(i.tile_index)
+
         
         comb_list = list(comb)
         column_list = []
@@ -175,7 +180,10 @@ class ColumnPool():
                 si_new = SuperItem()
                 for i in si.item_set:
                     ix = copy.deepcopy(i)
-                    ix.tile_index -= n
+                    if isinstance(ix.tile_index, int):
+                        ix.tile_index -= n
+                    if isinstance(ix.tile_index, list):
+                        ix.tile_index = i.tile_index.pop()
                     ix.id = self.item_index
                     ix.x_pos = si.x_pos
                     ix.y_pos = si.y_pos
@@ -212,8 +220,13 @@ class ColumnPool():
         num_columns = float('inf')
         for si in comb:
             for i in si.item_set:
-                if i.tile_index < num_columns:
-                    num_columns = i.tile_index
+                if isinstance(i.tile_index,int):
+                    if i.tile_index < num_columns:
+                        num_columns = i.tile_index
+                if isinstance(i.tile_index,list):
+                    if len(i.tile_index) < num_columns:
+                        num_columns = len(i.tile_index)
+
 
         new_si_pool = set()
         comb_items = [[x for x in y.item_set] for y in comb]
@@ -224,10 +237,17 @@ class ColumnPool():
             for i in si.item_set:
                 if i in comb_items:
                     ix = copy.deepcopy(i)
-                    ix.tile_index -= num_columns
-                    if ix.tile_index <= 0:
-                        tiles_to_be_allocated_still = False
-                        break
+                    if isinstance(ix.tile_index, int):
+                        ix.tile_index -= num_columns
+                        if ix.tile_index <= 0:
+                            tiles_to_be_allocated_still = False
+                            break
+                    if isinstance(ix.tile_index, list):
+                        for iii in range(num_columns):
+                            ix.tile_index.pop()
+                        if ix.tile_index == []:
+                            tiles_to_be_allocated_still = False
+                            break
                     si_new.add_item(ix)
             if tiles_to_be_allocated_still and si_new.item_set != set():
                 new_si_pool.add(si_new)
@@ -323,7 +343,8 @@ class ColumnPool():
             new_column_list = self.generate_columns_from_comb_not_allocated(best_comb)
             total_column_list += new_column_list
             aa = len(superitem_pool)
-            superitem_pool = self.update_superitem_pool_nac(superitem_pool, best_comb)
+            #superitem_pool = self.update_superitem_pool_nac(superitem_pool, best_comb)
+            superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
             assert  aa > len(superitem_pool)
             # Assign column to new_bin_dict
             min_rw = float('inf')

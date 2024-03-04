@@ -91,8 +91,10 @@ class LomaEngine:
                 yielded = True
                 yield temporal_mapping
             except MemoryHierarchyTooSmallException:
+                breakpoint()
                 pass
             except MemoryTooSmallException:
+                breakpoint()
                 pass  # Skip the ordering that crashed due to ordering (+su) not fitting in memory
             if self.show_progress_bar:
                 pbar.update(1)
