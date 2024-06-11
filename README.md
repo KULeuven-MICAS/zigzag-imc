@@ -9,6 +9,12 @@ ZigZag-IMC bridges the gap between algorithmic DL decisions and their IMC accele
 - Considering ZigZag-IMC framework is an enhanced version of ZigZag framework, we have merged this ZigZag-IMC repository with the [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag) for an easy maintenance. 
 Please refer to the [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag), which will have regular updates and maintenance, if you are looking for ZigZag-IMC framework. This repository for ZigZag-IMC will no longer be maintained in the future.
 
+#### Literature comparison
+
+| Framework                                                | Pros                                                               | Cons                                                                                                                       |
+|:---------------------------------------------------------|:-------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| [Cimloop](https://arxiv.org/abs/2405.07259) (ISPASS2024) | extended with NeuroSim, support NVM-based IMC                      | model validated to 1 chip per technology, ADC models extracted from pure ADC works (higher energy and area cost, no delay) |
+| ZigZag-IMC                                               | models validated against 7 IMC chips on 28nm, higher reliability   | only support SRAM-based IMC                                                                                                |
 
 ## Prerequisite
 
