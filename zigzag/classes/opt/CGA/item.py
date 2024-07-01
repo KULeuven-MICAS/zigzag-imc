@@ -94,7 +94,7 @@ class ItemPool():
                         d2_comb = cx
 
             OXu = next((x for x in self.ox_unrolling_scheme if x[0] == ii_n),[1,1])[1]
-            item_repetition = np.prod([x for k,x in n.items() if k in ['K','FX','FY','C']]) / np.prod([x[1] for x in d1_comb + d2_comb]) * OXu
+            item_repetition = np.prod([x for k,x in n.items() if k in ['G','K','FX','FY','C']]) / np.prod([x[1] for x in d1_comb + d2_comb]) * OXu
             if item_repetition > self.D3:
                 feasible_tile_configuration = False
                 return None, feasible_tile_configuration, (n['layer_id'], d1_comb, d2_comb, OXu)
@@ -113,6 +113,7 @@ class ItemPool():
                     if int(n[loop_type] / lp[1]) != 1:
                         d3_comb.append((loop_type, int(n[loop_type] / lp[1])))
             d3_comb.append(('OX',OXu))
+            d3_comb.append(('G',n['G']))
 #            self.network[ii_n]['OXt'] = int(self.network[ii_n]['OX'] / OXu)
 #            self.network[ii_n]['OX'] = OXu
             if d1_comb == tuple():
@@ -175,8 +176,18 @@ class ItemPool():
                 if self.verbose == 2:
                     logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
 
+        for layer_index, layer in self.network.items():
+            fitting = False
+            if np.prod([layer['G']]) <= self.D3:
+                fitting = True
+            else:
+                breakpoint()
+                return False
+
+
         feasible_configuration = False
         if any([x['M'] > self.M for x in self.network.values()]):
+            breakpoint()
             return feasible_configuration
         else:
             feasible_configuration = True
@@ -204,6 +215,7 @@ class ItemPool():
         network_copy = copy.deepcopy(self.network)
         target_layer_index = next((k for k,v in self.network.items() if v['layer_id'] == target_layer_index_r),None)
         k_pf = [('K',int(x)) for x in prime_factors(self.network[target_layer_index]['K'])]
+        g_pf = [('G',int(x)) for x in prime_factors(self.network[target_layer_index]['G'])]
         c_pf = [('C',int(x)) for x in prime_factors(self.network[target_layer_index]['C'])]
         fx_pf = [('FX',int(x)) for x in prime_factors(self.network[target_layer_index]['FX'])]
         fy_pf = [('FY',int(x)) for x in prime_factors(self.network[target_layer_index]['FY'])]
@@ -232,8 +244,8 @@ class ItemPool():
                     d3_comb = cx
         d3_len = np.prod([c[1] for c in d3_comb])
         d3_comb_new = copy.deepcopy(d3_comb)
-        for k in range(len(k_pf)+1):
-            for comb in itertools.combinations(k_pf, k):
+        for k in range(len(k_pf + g_pf)+1):
+            for comb in itertools.combinations(k_pf + g_pf, k):
                 if d3_len * np.prod([c[1] for c in comb]) <= self.D3 and d3_len * np.prod([c[1] for c in comb]) > max_utilization:
                     max_utilization = d3_len * np.prod([c[1] for c in comb])
                     cx = d3_comb + [tuple([x[0],int(x[1])]) for x in comb]
@@ -249,8 +261,11 @@ class ItemPool():
                 fy_pf.remove(('FY',d3_cpf[1]))
             if d3_cpf[0] == 'K':
                 k_pf.remove(('K',d3_cpf[1]))
+            if d3_cpf[0] == 'G':
+                g_pf.remove(('G',d3_cpf[1]))
 
-        for pf in c_pf + fx_pf + fy_pf + k_pf:
+
+        for pf in c_pf + fx_pf + fy_pf + k_pf + g_pf:
             network_copy[target_layer_index][pf[0]] /= pf[1]
             network_copy[target_layer_index][f'{pf[0]}t'] *= pf[1]
             network_copy[target_layer_index][f'M'] *= pf[1]
@@ -273,8 +288,8 @@ class ItemPool():
         weight_area = []
         vals = []
         for layer_index, layer in self.network.items():
-            latency.append(layer['OXt'] * layer['OY'] * layer['Ct'] * layer['FXt'] * layer['FYt'] * layer['Kt'])
-            weight_area.append(layer['C'] * layer['K'] * layer['FX'] * layer['FY'] * layer['OX'])
+            latency.append(layer['OXt'] * layer['OY'] * layer['Ct'] * layer['FXt'] * layer['FYt'] * layer['Kt'] * layer['Gt'])
+            weight_area.append(layer['C'] * layer['K'] * layer['FX'] * layer['FY'] * layer['OX'] * layer['G'])
             vals.append({'network_index':layer['layer_id'],'latency':latency[-1],'weight_area':weight_area[-1]})
         df = pd.DataFrame(vals)
         df = df.sort_values(by=['latency','weight_area'],ascending=[True,False],ignore_index=True)

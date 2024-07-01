@@ -69,6 +69,8 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     sram_size = 256 * 1024 # unit: byte
     sram_bw = max(imc_array.unit.bl_dim_size * hd_param["input_precision"] * imc_array.unit.nb_of_banks,
                   imc_array.unit.wl_dim_size * output_precision * imc_array.unit.nb_of_banks)
+    sram_size = 19696
+    sram_bw  =512
     ac_time, sram_area, sram_r_cost, sram_w_cost = get_cacti_cost(cacti_path, tech_param["tech_node"], "sram",
                                                                   sram_size, sram_bw,
                                                                   hd_hash=str(hash((sram_size, sram_bw, random.randbytes(8)))))
@@ -91,8 +93,8 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     #######################################################################################################################
 
     dram_size = 1*1024*1024*1024 # unit: byte
-    dram_ac_cost_per_bit = 3.7 # unit: pJ/bit
-    dram_bw = imc_array.unit.wl_dim_size * hd_param["weight_precision"] * imc_array.unit.nb_of_banks
+    dram_ac_cost_per_bit = 50 # unit: pJ/bit
+    dram_bw =256#imc_array.unit.wl_dim_size * hd_param["weight_precision"] * imc_array.unit.nb_of_banks
     dram_100MB_32_3r_3w = MemoryInstance(
         name="dram_1GB",
         size=dram_size*8, # byte -> bit

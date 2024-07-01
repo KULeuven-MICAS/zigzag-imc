@@ -60,7 +60,7 @@ class DimcArrayUnit(ImcUnit):
         tech_node = self.logic_unit.tech_param["tech_node"]
         group_depth = self.hd_param["group_depth"]
         w_pres = self.hd_param["weight_precision"]
-        if False:#self.hd_param["enable_cacti"] == True:
+        if self.hd_param["enable_cacti"] == True:
             single_cell_array_area = self.get_single_cell_array_cost_from_cacti(tech_node,
                                                                                 self.wl_dim_size,
                                                                                 self.bl_dim_size,
@@ -69,8 +69,9 @@ class DimcArrayUnit(ImcUnit):
             # at this point, we have the area of single cell array. Then multiply it with the number of banks.
             area_cells = single_cell_array_area * self.nb_of_banks # total cell array area in the core
         else:
+            pass
             # TODO: [jiacong] [TO BE SUPPORTED OR YOU CAN MODIFY YOURSELF]
-            area_cells = 3e-6 #None  # user-provided cell array area (from somewhere?)
+        #    area_cells = 3e-6 #None  # user-provided cell array area (from somewhere?)
             #raise Exception(f"User-provided cell area is not supported yet.")
 
         """area of multiplier array"""
@@ -79,8 +80,9 @@ class DimcArrayUnit(ImcUnit):
 
         """area of adder trees (type: RCA)"""
         adder_input_pres = w_pres # input precision of the adder tree
+        # [EDIT] by pouya to support adder tree across separate cores
         nb_inputs_of_adder = self.bl_dim_size # the number of inputs of the adder tree
-        adder_structure = self.get_adder_depth_structure(self.bl_dim_size)
+        adder_structure = self.get_adder_depth_structure(self.bl_dim_size * self.nb_of_banks)
         area_adders = 0
         area_adders_pv = 0
         area_accumulators = 0
@@ -92,7 +94,7 @@ class DimcArrayUnit(ImcUnit):
             # [TODO] adder output precision should be the max between the adder trees in the structure
             adder_output_pres = adder_input_pres + max([math.log2(x) for x in adder_structure]) # output precision of the adder tree
             nb_of_1b_adder_in_single_adder_tree = nb_inputs_of_adder * (adder_input_pres+1) - (adder_input_pres+adder_depth+1) # nb of 1b adders in a single adder tree
-            nb_of_adder_trees = self.hd_param["input_bit_per_cycle"] * self.wl_dim_size * self.nb_of_banks
+            nb_of_adder_trees = self.hd_param["input_bit_per_cycle"] * self.wl_dim_size 
             area_adders += self.logic_unit.get_1b_adder_area() * nb_of_1b_adder_in_single_adder_tree * nb_of_adder_trees
 
             """area of extra adders with place values (pv) when input_bit_per_cycle>1 (type: RCA)"""
@@ -107,15 +109,15 @@ class DimcArrayUnit(ImcUnit):
                     f"[DimcArray] The value [{nb_inputs_of_adder_pv}] of [input_bit_per_cycle] is not in the power of 2."
                 adder_depth_pv = int(adder_depth_pv) # float -> int for simplicity
                 nb_of_1b_adder_pv = input_precision_pv * (nb_inputs_of_adder_pv-1) + nb_inputs_of_adder_pv * (adder_depth_pv-0.5) # nb of 1b adders in a single place-value adder tree
-                nb_of_adder_trees_pv = self.wl_dim_size * self.nb_of_banks
+                nb_of_adder_trees_pv = self.wl_dim_size 
             area_adders_pv += self.logic_unit.get_1b_adder_area() * nb_of_1b_adder_pv * nb_of_adder_trees_pv
 
             """area of accumulators (adder type: RCA)"""
             if self.hd_param["input_bit_per_cycle"] == self.hd_param["input_precision"]:
                 area_accumulators += 0
             else:
-                accumulator_output_pres = self.hd_param["input_precision"]+self.hd_param["weight_precision"]+math.log2(self.bl_dim_size)
-                nb_of_1b_adder_accumulator = accumulator_output_pres * self.wl_dim_size * self.nb_of_banks # number of 1b adder in all accumulators
+                accumulator_output_pres = self.hd_param["input_precision"]+self.hd_param["weight_precision"]+math.log2(self.bl_dim_size )
+                nb_of_1b_adder_accumulator = accumulator_output_pres * self.wl_dim_size # number of 1b adder in all accumulators
                 nb_of_1b_reg_accumulator = nb_of_1b_adder_accumulator # number of regs in all accumulators
                 area_accumulators += self.logic_unit.get_1b_adder_area() * nb_of_1b_adder_accumulator + \
                                     self.logic_unit.get_1b_reg_area() * nb_of_1b_reg_accumulator
@@ -137,7 +139,7 @@ class DimcArrayUnit(ImcUnit):
 
         """delay of adders (tree) (type: RCA)"""
         adder_input_pres = self.hd_param["weight_precision"]
-        adder_structure = self.get_adder_depth_structure(self.bl_dim_size)
+        adder_structure = self.get_adder_depth_structure(self.bl_dim_size * self.nb_of_banks)
         dly_adders, dly_adders_pv, dly_accumulators = [], [], []
         for nb_inputs_of_adder in adder_structure:
             adder_depth = math.log2(nb_inputs_of_adder)
@@ -165,7 +167,7 @@ class DimcArrayUnit(ImcUnit):
                 dly_adders_pv += [(adder_depth_pv - 1) * self.logic_unit.get_1b_adder_dly_in2sum() + self.logic_unit.get_1b_adder_dly_in2cout() + (adder_pv_output_precision - adder_pv_input_precision-1) * self.logic_unit.get_1b_adder_dly_cin2cout()]
 
             """delay of accumulators (adder type: RCA)"""
-            accumulator_output_pres = self.hd_param["input_precision"] + self.hd_param["weight_precision"] + math.log2(self.bl_dim_size)
+            accumulator_output_pres = self.hd_param["input_precision"] + self.hd_param["weight_precision"] + math.log2(self.bl_dim_size * self.nb_of_banks)
             accumulator_output_pres = int(accumulator_output_pres) # float -> int for simplicity
             if accumulator_output_pres == accumulator_input_pres: # no accumulator
                 dly_accumulators += [0]
@@ -200,7 +202,7 @@ class DimcArrayUnit(ImcUnit):
 
         """energy of adder trees (type: RCA)"""
         adder_input_pres = w_pres # input precision of the adder tree
-        adder_structure = self.get_adder_depth_structure(self.bl_dim_size)
+        adder_structure = self.get_adder_depth_structure(self.bl_dim_size * self.nb_of_banks)
         energy_adders, energy_adders_pv, energy_accumulators = 0, 0, 0
         for nb_inputs_of_adder in adder_structure:
             adder_depth = math.log2(nb_inputs_of_adder)
@@ -227,7 +229,7 @@ class DimcArrayUnit(ImcUnit):
             if self.hd_param["input_bit_per_cycle"] == self.hd_param["input_precision"]:
                 energy_accumulators += 0
             else:
-                accumulator_output_pres = self.hd_param["input_precision"]+self.hd_param["weight_precision"]+math.log2(self.bl_dim_size)
+                accumulator_output_pres = self.hd_param["input_precision"]+self.hd_param["weight_precision"]+math.log2(self.bl_dim_size * self.nb_of_banks)
                 nb_of_1b_adder_accumulator = accumulator_output_pres * self.wl_dim_size * self.nb_of_banks # number of 1b adder in all accumulators
                 nb_of_1b_reg_accumulator = nb_of_1b_adder_accumulator # number of regs in all accumulators
                 energy_accumulators += self.logic_unit.get_1b_adder_energy() * nb_of_1b_adder_accumulator + \

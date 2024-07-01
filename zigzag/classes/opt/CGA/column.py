@@ -390,8 +390,9 @@ class ColumnPool():
     def generate(self, superitem_pool):
         total_column_list = []
         while superitem_pool != set():
-            #logger.info(f'Superitem to be assigned: {len(superitem_pool)}')
             max_density = 0
+            if self.verbose == 2:
+                logger.info(f'Superitem to be assigned: {len(superitem_pool)}')
             max_height = max([x.height for x in superitem_pool if len(x.item_set) == 1])
             superitem_pool_redux = [x for x in superitem_pool if x.height == max_height and len(x.item_set) == 1]
             for ii_si, si in enumerate(superitem_pool_redux):
@@ -412,6 +413,63 @@ class ColumnPool():
             superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
             if self.verbose == 2:
                 logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+
+        self.total_column_list = total_column_list
+        if self.verbose == 1:
+            logger.info(f'Generated Columns #{len(total_column_list)}')
+
+        return total_column_list
+
+    def generate_combinatorial(self, superitem_pool):
+        total_column_list = []
+        while superitem_pool != set():
+            max_density = 0
+            best_column = None
+            if self.verbose == 2:
+                logger.info(f'Superitem to be assigned: {len(superitem_pool)}')
+#            max_height = max([x.height for x in superitem_pool if len(x.item_set) == 1])
+#            superitem_pool_redux = [x for x in superitem_pool if x.height =< max_height]
+            for k in range(1,len(superitem_pool)+1):
+                max_density_k = 0
+                best_column_k = None
+                column_combs = list(itertools.combinations(list(superitem_pool),k))
+                for comb in column_combs:
+                    column = CGAColumn(self.width, self.depth)
+                    fitting = False
+                    feasible = True
+                    for si in comb:
+                        if si.layer_index_set.intersection(column.layer_index_set) == set():
+                            column.add_superitem(si)
+                        else:
+                            feasible = False
+                            break
+                    if not feasible:
+                        continue
+
+                    superitem_set = copy.deepcopy(column.superitem_set)
+                    fitting, density, superitems_comb = ColumnPool.pack_2D(list(superitem_set), column)
+                    if not fitting:
+                        continue
+                    column.density = density
+                    if density > max_density_k:
+                        max_density_k = density
+                        best_column_k = column
+                if max_density_k >= max_density:
+                    max_density = max_density_k
+                    best_column = best_column_k
+                    if best_column != None:
+                        best_comb = copy.deepcopy(best_column.superitem_set)
+                    if max_density == 1:
+                        break
+                else:
+                    break
+            if best_column != None:
+                column_list = self.generate_columns_from_comb(best_comb)
+                total_column_list += column_list
+                superitem_pool = self.update_superitem_pool(superitem_pool, best_comb)
+                if self.verbose == 2:
+                    logger.info(f'Generated Layer #{len(total_column_list)}; SuperItems to be assigned: {len(superitem_pool)}')
+
 
         self.total_column_list = total_column_list
         if self.verbose == 1:

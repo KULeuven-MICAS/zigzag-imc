@@ -203,7 +203,8 @@ class CostModelEvaluationForIMC:
         # get imc area
         operational_array = self.accelerator.get_core(self.core_id).operational_array
         self.imc_area = operational_array.total_area
-        #print('Area', self.imc_area)
+        print('Area', self.imc_area)
+        breakpoint()
         self.imc_area_breakdown = operational_array.area_breakdown
         # get mem area
         self.mem_area = 0
@@ -465,8 +466,10 @@ class CostModelEvaluationForIMC:
 
         # [pouya] modification made to add extra energy/latency cost for extra cells to be read
         # [pouya] Assumes only two level stage memory!
-        memory_word_access['W'][0].wr_in_by_high += self.extra_cells
-        memory_word_access['W'][1].rd_out_to_low += self.extra_cells
+        #memory_word_access['W'][0].wr_in_by_high += self.extra_cells
+        #memory_word_access['W'][0].wr_in_by_high = 0 #self.extra_cells
+        #memory_word_access['W'][1].rd_out_to_low += self.extra_cells
+        #memory_word_access['W'][1].rd_out_to_low = 0 #self.extra_cells
         self.memory_word_access = memory_word_access
 
     ## Calculates the energy cost of this cost model evaluation by calculating the memory reading/writing energy.
@@ -825,9 +828,9 @@ class CostModelEvaluationForIMC:
         else:
             weight_loading_cycles = 0
 
-        #self.SS_comb = weight_loading_cycles
+        self.SS_comb = weight_loading_cycles
         # [pouya] Change made to count only the extra rows that have to be written, assuming stationary weights
-        self.SS_comb = self.extra_rows
+        #self.SS_comb = self.extra_rows
 
         # Step 3: fetch tclk information
         self.tclk = operational_array.tclk

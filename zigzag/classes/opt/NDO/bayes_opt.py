@@ -26,19 +26,19 @@ class BayesianOptimizer(BlackBoxOptimizer):
         self.optimizer_params = optimizer_params
     
     def runner(self):
-        self.init_optimizer()
+#        self.init_optimizer()
         for i in range(self.optimizer_params['iterations']):
-            try:
-                print(len(self.input_range))
-                logger.info(f'BO: Iteration {i} / {self.optimizer_params["iterations"]}')
-                optimizer_targets = self.sample() 
-                self.get_cost(optimizer_targets)
-                self.update_optimizer()
-            except:
-                break
+#        for i in range(len(parameters)):
+#            print(len(self.input_range))
+#                logger.info(f'BO: Iteration {i} / {self.optimizer_params["iterations"]}')
+            for ii_ot, optimizer_target in enumerate(self.optimizer_targets):
+                self.optimizer_targets[ii_ot].target_parameters = optimizer_target.target_range[0]
+
+#                optimizer_targets = self.sample() 
+            self.get_cost(self.optimizer_targets)
+#                self.update_optimizer()
         with open('data.pkl','wb') as infile:
             pickle.dump([self.input_samples, self.output_samples], infile)
-        breakpoint()
 
     def sample(self, init=False):
         while(1):
@@ -80,7 +80,8 @@ class BayesianOptimizer(BlackBoxOptimizer):
             return True
         else:
             return False
-            
+
+
     def init_optimizer(self):
         for i in range(self.optimizer_params['init_iterations']):
             logger.info(f'BO: Init iteration {i}')
@@ -89,6 +90,7 @@ class BayesianOptimizer(BlackBoxOptimizer):
         self.init_surrogate()
         self.update_optimizer()
 
+
     def get_cost(self, optimizer_targets):
         self.kwargs['optimizer_targets'] = optimizer_targets
         logger.info(f'BO: Evaluate array dimension: {[x.target_parameters for x in optimizer_targets]}')
@@ -96,15 +98,20 @@ class BayesianOptimizer(BlackBoxOptimizer):
         cme_list = []
         for cme, extra_info in sub_stage.run():
             cme_list.append(cme)
-        cost = -sum([x.energy_total * x.latency_total0 for x in cme_list])
-        if cost > self.best_cost:
-            self.best_cost = cost
-        logger.info(f'BO: Cost {cost:6.2e} Best cost {self.best_cost:6.2e}')
-        self.output_samples.append(cost)
+        if cme_list != [[]]:
+            #cost = sum([x.energy_total * x.latency_total0 for x in cme_list])
+            #if cost < self.best_cost:
+            #    self.best_cost = cost
+            #logger.info(f'BO: Cost {cost:6.2e} Best cost {self.best_cost:6.2e}')
+            self.output_samples.append(cme_list)
+        else:
+            self.output_samples.append(cme_list)
+
 
     def update_optimizer(self):
         self.gp_model.fit(np.array(self.input_samples), np.array(self.output_samples))
         self.acquisition_function()
+
 
     def init_surrogate(self):
         self.kernel = RBF(length_scale=1.0)
