@@ -91,10 +91,8 @@ class LomaEngine:
                 yielded = True
                 yield temporal_mapping
             except MemoryHierarchyTooSmallException:
-                breakpoint()
                 pass
             except MemoryTooSmallException:
-                breakpoint()
                 pass  # Skip the ordering that crashed due to ordering (+su) not fitting in memory
             if self.show_progress_bar:
                 pbar.update(1)
@@ -103,6 +101,7 @@ class LomaEngine:
             pbar.close()
 
         if not yielded:
+            breakpoint()
             raise NoValidLoopOrderingFoundException(
                 f"No valid loop ordering was found for layer {self.layer}. Please make sure the spatial mapping is compatible with the architecture."
             )

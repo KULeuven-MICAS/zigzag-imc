@@ -56,9 +56,9 @@ class MacroBin():
             bin_alloc_list.append(bin_alloc)
         else:
             for column in column_list:
-    #            if column.layer_index_set.intersection(bin_alloc.layer_index_set) != set():
-    #                MacroBin.macro_allocation_recursive(bin_alloc, max_height, [], bin_alloc_list)
-                if column.height + bin_alloc.height > max_height:
+                if column.layer_index_set.intersection(bin_alloc.layer_index_set) != set():
+                    MacroBin.macro_allocation_recursive(bin_alloc, max_height, [], bin_alloc_list)
+                elif column.height + bin_alloc.height > max_height:
                     MacroBin.macro_allocation_recursive(bin_alloc, max_height, [], bin_alloc_list)
                 else:
                     bin_alloc_copy = copy.deepcopy(bin_alloc)
@@ -207,6 +207,8 @@ class MacroBin():
                 if [] in total_bin_alloc_list:
                     print('Still to be allocated', [[x.layer_index_set for x in y] for y in new_total_bin_alloc.values()])
                     print('To be allocated', [[x.layer_index_set for x in y] for y  in not_allocated_valid_column_subsets])
+                    bin_dict = {}
+                    return bin_dict, "UNFEASIBLE", set(not_allocated_items)
                     breakpoint()
                 bin_dict =  {}
                 for i in range(self.D3):

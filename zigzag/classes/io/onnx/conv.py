@@ -117,7 +117,7 @@ class ConvParser(Parser):
                 f"ix={strides[0]}*ox+{dilations[0]}*fx",
                 f"iy={strides[1]}*oy+{dilations[1]}*fy",
             ]
-            d["operand_precision"] = {"O": 16, "O_final": 8, "W": 8, "I": 8}
+            d["operand_precision"] = {"O": 16, "O_final": 4, "W": 4, "I": 4}
             # d["operand_source"] =  {'W': [], 'I': []}
             d["constant_operands"] = ["W"]
 

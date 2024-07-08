@@ -57,6 +57,7 @@ class ItemPool():
         feasible_tile_configuration = True
         for ii_n, n in self.network.items():
             k_pf = [('K',x) for x in prime_factors(n['K'])]
+            gm_pf = [('Gm',x) for x in prime_factors(n['Gm'])]
             c_pf = [('C',x) for x in prime_factors(n['C'])]
             fx_pf = [('FX',x) for x in prime_factors(n['FX'])]
             fy_pf = [('FY',x) for x in prime_factors(n['FY'])]
@@ -65,8 +66,8 @@ class ItemPool():
             d2_comb = []
             max_d1, max_d2 = 0,0
 
-            for k in range(len(k_pf)+1):
-                for c in itertools.combinations(k_pf,k):
+            for k in range(len(k_pf) + len(gm_pf) +1):
+                for c in itertools.combinations(k_pf + gm_pf,k):
                     if np.prod([x[1] for x in c]) <= self.D1 and np.prod([x[1] for x in c]) > max_d1:
                         max_d1 = np.prod([x[1] for x in c])
                         cx = []
@@ -94,7 +95,9 @@ class ItemPool():
                         d2_comb = cx
 
             OXu = next((x for x in self.ox_unrolling_scheme if x[0] == ii_n),[1,1])[1]
-            item_repetition = np.prod([x for k,x in n.items() if k in ['G','K','FX','FY','C']]) / np.prod([x[1] for x in d1_comb + d2_comb]) * OXu
+            
+            d1_combx = tuple([x for x in d1_comb if x[0] != 'Gm'])
+            item_repetition = np.prod([x for k,x in n.items() if k in ['G','K','FX','FY','C']]) / np.prod([x[1] for x in d1_combx + d2_comb]) * OXu
             if item_repetition > self.D3:
                 feasible_tile_configuration = False
                 return None, feasible_tile_configuration, (n['layer_id'], d1_comb, d2_comb, OXu)
@@ -116,12 +119,12 @@ class ItemPool():
             d3_comb.append(('G',n['G']))
 #            self.network[ii_n]['OXt'] = int(self.network[ii_n]['OX'] / OXu)
 #            self.network[ii_n]['OX'] = OXu
-            if d1_comb == tuple():
+            if d1_combx == tuple():
                 d1_comb = (('K',1),)
             if d2_comb == tuple():
                 d2_comb = (('C',1),)
             items.append(Item(width=int(width), depth=int(depth), height=int(n['M']), layer_index=ii_n, tile_index=int(item_repetition), \
-                    D1_unroll = tuple(d1_comb), D2_unroll = tuple(d2_comb), D3_unroll = tuple(d3_comb)))
+                    D1_unroll = tuple([x for x in d1_comb if x[0] != 'Gm']), D2_unroll = tuple(d2_comb), D3_unroll = tuple(d3_comb)))
             if self.verbose == 2:
                 logger.info(f"Generated #{len(items):4} {items[-1]}")
 
@@ -134,7 +137,7 @@ class ItemPool():
     def set_init_M(self, ox_unrolling_scheme):
 
         
-        # Make sure that C, FX, FY fit in D2 * D3
+        # Make sure that C, FX, FY, G fit in D2 * D3
         for layer_index, layer in self.network.items():
             fitting = False
             if layer_index in [x[0] for x in ox_unrolling_scheme]:
@@ -153,6 +156,7 @@ class ItemPool():
                 
                 pf = c_pf + fx_pf + fy_pf  
                 pf.sort(key = lambda x: x[1])
+                pf.reverse()
                 pf_cut = pf[0]
                 self.network[layer_index][pf_cut[0]] /= pf_cut[1]
                 self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
@@ -178,11 +182,41 @@ class ItemPool():
 
         for layer_index, layer in self.network.items():
             fitting = False
-            if np.prod([layer['G']]) <= self.D3:
-                fitting = True
-            else:
-                breakpoint()
-                return False
+            while not fitting:
+                if np.prod([layer['G']]) <= self.D3:
+                    fitting = True
+                    continue
+                g_pf = [('G',x) for x in prime_factors(layer['G'])]
+                pf = g_pf
+                pf.sort(key = lambda x: x[1])
+                pf_cut = pf[0]
+                self.network[layer_index][pf_cut[0]] /= pf_cut[1]
+                self.network[layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
+                self.network[layer_index][f'M'] *= pf_cut[1]
+                if self.verbose == 2:
+                    logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {self.network[layer_index][pf_cut[0]]} {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]}, M:{self.network[layer_index]["M"]}')
+
+            fitting = True
+            self.network[layer_index]['Gm'] = 1
+            g_pf = None
+            while fitting:
+                g_pf = [('G',x) for x in prime_factors(layer['Gt'])]
+                pf = g_pf
+                pf.sort(key = lambda x: x[1])
+                if pf == []:
+                    break
+                pf_cut = pf[0]
+                if self.network[layer_index]['Gm']*pf_cut[1] > self.D1:
+                    fitting = False
+                    break
+
+                self.network[layer_index]['Gt'] /= pf_cut[1]
+                self.network[layer_index]['Gm'] *= pf_cut[1]
+                self.network[layer_index][f'M'] /= pf_cut[1]
+                if self.verbose == 2:
+                    logger.info(f'Mapping init: Layer {layer_index} cut {pf_cut[0]}t by {pf_cut[1]} --> {pf_cut[0]}t: {self.network[layer_index][pf_cut[0]+"t"]} {pf_cut[0]}m: {self.network[layer_index][pf_cut[0]+"m"]}, M:{self.network[layer_index]["M"]}')
+
+
 
 
         feasible_configuration = False
@@ -293,6 +327,7 @@ class ItemPool():
             vals.append({'network_index':layer['layer_id'],'latency':latency[-1],'weight_area':weight_area[-1]})
         df = pd.DataFrame(vals)
         df = df.sort_values(by=['latency','weight_area'],ascending=[True,False],ignore_index=True)
+#        df = df.sort_values(by=['weight_area'],ascending=[False],ignore_index=True)
         feasible_configuration = False
 
         for i,r in df.iterrows():
@@ -320,6 +355,7 @@ class ItemPool():
             else:
                 pf = c_pf + fx_pf + fy_pf  
                 pf.sort(key = lambda x: x[1])
+                pf.reverse()
                 pf_cut = pf[0]
                 network_copy[target_layer_index][pf_cut[0]] /= pf_cut[1]
                 network_copy[target_layer_index][f'{pf_cut[0]}t'] *= pf_cut[1]
@@ -328,6 +364,7 @@ class ItemPool():
                     logger.info(f'Network update: Layer {target_layer_index} cut {pf_cut[0]} by {pf_cut[1]} --> {pf_cut[0]}: {network_copy[target_layer_index][pf_cut[0]]} {pf_cut[0]}t: {network_copy[target_layer_index][pf_cut[0]+"t"]}, M:{network_copy[target_layer_index]["M"]}')
 
             if any([x['M'] > self.M for x in network_copy.values()]):
+                logger.info('No modify')
                 continue
             else:
                 self.network = network_copy

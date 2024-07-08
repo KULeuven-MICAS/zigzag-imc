@@ -66,14 +66,14 @@ class WeightPackingStage(Stage):
         cost_dict = None
         while solver_status not in ['OPTIMAL','FEASIBLE']:
         #    logger.info("===== ItemPool Generation =====")
-            si = SuperItemPool(item_pool,verbose=1)
+            si = SuperItemPool(item_pool,verbose=2)
         #    logger.info("===== SuperItemPool Generation =====")
             superitem_pool = si.generate()
         #    logger.info("===== ColumnPool Generation =====")
             column_pool = ColumnPool(D1=D1,D2=D2, network_layers=len(network.keys()),verbose=2)
             column_list = column_pool.generate_combinatorial(superitem_pool)
         #    logger.info("===== Bin Allocation =====")
-            macro_bin = MacroBin(height=M, number_of_macros=D3,verbose=1)
+            macro_bin = MacroBin(height=M, number_of_macros=D3,verbose=2)
             bin_dict, solver_status, not_allocated_item_pool = macro_bin.macro_allocation(column_list)
             #bin_dict, solver_status = macro_bin.pack_macrobin(column_list, fsi, zsl, ol, nki)
             self.generate_mappings(network, item_pool)
@@ -81,6 +81,7 @@ class WeightPackingStage(Stage):
                 #plot_item_allocation(column_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
                 #utilization = self.get_utilization(item_pool) / D1 / D2 / D3 
                 cost, cme_list = self.get_cost(kwargs, {},{})
+                breakpoint()
                 utilization = self.get_utilization_weighted(item_pool, cme_list, D1, D2, D3)
                 memory_utilization = self.get_memory_utilization(item_pool, D1, D2, D3,M)
                 cost_list_iterations.append(['Allocated',cost])
@@ -171,16 +172,28 @@ class WeightPackingStage(Stage):
         for cme, (layer, extra_info) in sub_stage.run():
             cme_list.append(cme)
         try:
-            cost = sum([(sum([v for v in x.MAC_energy_breakdown.values()]) + sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1])) * x.latency_total0 for x in cme_list])
-            print(cme_list[0].imc_area)
-            print([x.mem_energy_breakdown['W'] for x in cme_list])
+            cost = sum([(sum([v for v in x.MAC_energy_breakdown.values()]) + sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1])) * x.ideal_temporal_cycle for x in cme_list])
+#            print(cme_list[0].imc_area)
+            print('Weight breakdown', [x.mem_energy_breakdown['W'] for x in cme_list])
             print('mem_energy',sum([ sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1]) for x in cme_list]))
             print('MAC energy',sum([ sum([v for v in x.MAC_energy_breakdown.values()]) for x in cme_list]))
-            print('weight energy', [sum(x.mem_energy_breakdown['W']) for x in cme_list])
-            print('weight energy',sum([x.mem_energy_breakdown['W'][0] for x in cme_list]))
+            mac_energy = {}
+            for k in cme_list[0].MAC_energy_breakdown.keys():
+                mac_energy[k] = 0
+                for x in cme_list:
+                    for kk, vv in x.MAC_energy_breakdown.items():
+                        if kk == k:
+                            mac_energy[kk] += vv
+            print('MAC_ENERGY',mac_energy)
+            print('weight total energy', [sum(x.mem_energy_breakdown['W']) for x in cme_list])
+#            print('weight cell energy',sum([x.mem_energy_breakdown['W'][0] for x in cme_list]))
             print('ideal_cycles', sum([x.ideal_temporal_cycle for x in cme_list]))
-            print('Stalls', [x.SS_comb for x in cme_list])
-            breakpoint()
+
+            print()
+            print(f'EDP {cost:.2e}')
+            print()
+#            print('Stalls', [x.SS_comb for x in cme_list])
+
         except:
             pass
         return cost, cme_list
@@ -213,12 +226,14 @@ class WeightPackingStage(Stage):
 
         best_ox_unroll, best_ox_unroll_new = [], []
     
+        D1, D2, D3, M = self.get_IMC_dimension_parameters() 
+
         for layer_index, layer in network.items():
             ox_pf = [x for x in prime_factors(layer['OXt'])]
             ox_comb = []
             for k in range(1,len(ox_pf)+1):
                 for comb in itertools.combinations(ox_pf, k):
-                    if np.prod(comb) not in ox_comb:
+                    if np.prod(comb) not in ox_comb and np.prod(comb) <= D3:
                         ox_comb.append(np.prod(comb))
             if layer_index == 0:
                 ox_comb.insert(0,1)
@@ -266,6 +281,8 @@ class WeightPackingStage(Stage):
                 cme_list.append((ox_unrolling_scheme, cme,cost_dict))
                 break
             break
+        breakpoint()
+        
         cme_list.sort(key=lambda x: x[1])
         with open('experiment1.pkl','wb') as infile:
             pickle.dump(cme_list, infile)
@@ -280,9 +297,9 @@ class WeightPackingStage(Stage):
             layer_id = next((k for k,v in network.items() if v['layer_id'] == layer.id),None)
             layer_item = next((x for x in item_pool if x.layer_index == layer_id),None) 
             new_spatial_mapping = {'D1':layer_item.D1_unroll, 'D2':layer_item.D2_unroll, 'D3':layer_item.D3_unroll}
-            logger.info(f'Layer {layer_id} loop size {layer.loop_dim_size}')
-            logger.info(f'Layer {layer_id} mapping {new_spatial_mapping}')
-            print()
+            #logger.info(f'Layer {layer_id} loop size {layer.loop_dim_size}')
+            #logger.info(f'Layer {layer_id} mapping {new_spatial_mapping}')
+            #print()
             layer.user_spatial_mapping = new_spatial_mapping
 
 

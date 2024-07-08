@@ -193,16 +193,20 @@ class DimcArrayUnit(ImcUnit):
         """
         w_pres = self.hd_param["weight_precision"]
         """energy of precharging"""
-        energy_precharging = 0
+        single_pe_precharge_energy = ((self.logic_unit.tech_param["wl_cap"] * (self.logic_unit.tech_param["vdd"] ** 2)) + \
+                                      (self.logic_unit.tech_param["bl_cap"] * (self.logic_unit.tech_param["vdd"] ** 2) * self.hd_param['group_depth'])) * \
+                                     (self.hd_param["weight_precision"])
+
 
         """energy of multiplier array"""
         nb_of_mults = self.hd_param["input_bit_per_cycle"] * \
                      w_pres * self.wl_dim_size * self.bl_dim_size * self.nb_of_banks
         energy_mults = self.logic_unit.get_1b_multiplier_energy() * nb_of_mults
+        energy_precharging = single_pe_precharge_energy * self.wl_dim_size * self.bl_dim_size * self.nb_of_banks
 
         """energy of adder trees (type: RCA)"""
         adder_input_pres = w_pres # input precision of the adder tree
-        adder_structure = self.get_adder_depth_structure(self.bl_dim_size * self.nb_of_banks)
+        adder_structure = self.get_adder_depth_structure(self.bl_dim_size)
         energy_adders, energy_adders_pv, energy_accumulators = 0, 0, 0
         for nb_inputs_of_adder in adder_structure:
             adder_depth = math.log2(nb_inputs_of_adder)
@@ -242,7 +246,8 @@ class DimcArrayUnit(ImcUnit):
             "adders_pv": energy_adders_pv,
             "accumulators": energy_accumulators
         }
-        # peak_energy = sum([v for v in peak_energy_breakdown.values()])
+        peak_energy = sum([v for v in peak_energy_breakdown.values()])
+        print(peak_energy_breakdown)
         return peak_energy_breakdown
 
     def get_macro_level_peak_performance(self):
@@ -265,8 +270,8 @@ class DimcArrayUnit(ImcUnit):
         topsmm2_peak = tops_peak / imc_area
 
         logger = _logging.getLogger(__name__)
-        #logger.info(f"Current macro-level peak performance:")
-        #logger.info(f"TOP/s: {tops_peak}, TOP/s/W: {topsw_peak}, TOP/s/mm^2: {topsmm2_peak}")
+        logger.info(f"Current macro-level peak performance:")
+        logger.info(f"TOP/s: {tops_peak}, TOP/s/W: {topsw_peak}, TOP/s/mm^2: {topsmm2_peak}")
 
         return tops_peak, topsw_peak, topsmm2_peak
 

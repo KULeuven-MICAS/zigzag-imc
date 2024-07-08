@@ -107,7 +107,6 @@ class MemoryAllocator:
         # After all the nodes have been allocated, we can creat the TemporalMapping
         # object from the dictionary we have built
         temporal_mapping = TemporalMapping(self.temporal_mapping_dict, self.layer)
-
         return temporal_mapping
 
     ## Allocate a single memory node with the best loops that remain in the unallocated loop ordering.

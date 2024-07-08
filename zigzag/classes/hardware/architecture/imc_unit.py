@@ -32,8 +32,8 @@ class LogicUnit:
         self.check_tech_param(tech_param)
         """initialization"""
         self.tech_param = tech_param
-        self.tech_param["wl_cap"] = tech_param["nd2_cap"]/2 # wordline cap of each SRAM cell is treated as NAND2_cap/2
-        self.tech_param["bl_cap"] = tech_param["nd2_cap"]/2  # bitline cap of each SRAM cell is treated as NAND2_cap/2
+        self.tech_param["wl_cap"] = 2*0.040/1000#tech_param["nd2_cap"]/2 # wordline cap of each SRAM cell is treated as NAND2_cap/2
+        self.tech_param["bl_cap"] = 2* 0.040/1000# tech_param["nd2_cap"]/2  # bitline cap of each SRAM cell is treated as NAND2_cap/2
         self.group_depth = group_depth
 
     def set_group_depth(self, parameter):

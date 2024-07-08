@@ -177,9 +177,9 @@ def imc_array_dut(group_depth):
     """Multiplier array variables"""
     tech_param = { # 28nm
         "tech_node": 0.028,             # unit: um
-        "vdd":      0.72,                # unit: V
-        "nd2_cap":  0.3/1e3,            # unit: pF
-        "xor2_cap": 0.3/1e3,        # unit: pF
+        "vdd":      0.9,                # unit: V
+        "nd2_cap":  0.5/1e3,            # unit: pF
+        "xor2_cap": 0.5/1e3,        # unit: pF
         "dff_cap":  0.7*3/1e3,          # unit: pF
         "nd2_area": 0.614/1e6,          # unit: mm^2
         "xor2_area":0.614*2.4/1e6,      # unit: mm^2

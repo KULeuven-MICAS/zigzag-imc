@@ -52,7 +52,8 @@ class AimcArrayUnit(ImcUnit):
         k6 = 0.001 # fF
         adc_energy = (k5 * self.hd_param["adc_resolution"] + k6 * 4**self.hd_param["adc_resolution"]) * self.logic_unit.tech_param["vdd"]**2 # unit: fJ
         adc_energy = adc_energy/1000 # unit: pJ
-        return adc_area, adc_delay, adc_energy
+        adc_energy_fixed = 188/1000
+        return adc_area, adc_delay, adc_energy_fixed
 
     def get_dac_cost(self):
         """single DAC cost calculation"""
@@ -226,6 +227,8 @@ class AimcArrayUnit(ImcUnit):
             "accumulators": energy_accumulators
         }
         # peak_energy = sum([v for v in peak_energy_breakdown.values()])
+        print(peak_energy_breakdown)
+
         return peak_energy_breakdown
 
     ## macro-level peak performance of imc arrays (fully utilization, no weight updating)

@@ -39,7 +39,7 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     )
     reg_I1 = MemoryInstance(
         name="rf_I1",
-        size=hd_param["input_precision"],
+        size=hd_param["input_precision"]*10000,
         r_bw=hd_param["input_precision"],
         w_bw=hd_param["input_precision"],
         r_cost=0,
@@ -53,7 +53,7 @@ def memory_hierarchy_dut(imc_array, visualize=False):
 
     reg_O1 = MemoryInstance(
         name="rf_O1",
-        size=output_precision,
+        size=output_precision*10000,
         r_bw=output_precision,
         w_bw=output_precision,
         r_cost=0,
@@ -172,12 +172,12 @@ def memory_hierarchy_dut(imc_array, visualize=False):
     return memory_hierarchy_graph
 
 
-def imc_array_dut():
+def imc_array_dut(group_depth):
     """Multiplier array variables"""
     tech_param = { # 28nm
         "tech_node":0.028,             # unit: um
         "vdd":      0.9,               # unit: V
-        "nd2_cap":  0.7 / 1e3,         # unit: pF
+        "nd2_cap":  4*0.160 / 1e3,         # unit: pF
         "xor2_cap": 0.7 * 1.5 / 1e3,   # unit: pF
         "dff_cap":  0.7 * 3 / 1e3,     # unit: pF
         "nd2_area": 0.614 / 1e6,       # unit: mm^2
@@ -190,10 +190,10 @@ def imc_array_dut():
     hd_param = {
         "pe_type": "in_sram_computing", # for in-memory-computing. Digital core for different values.
         "imc_type": "analog",           # "digital" or "analog"
-        "input_precision":      8,      # activation precision
-        "weight_precision":     8,      # weight precision
-        "input_bit_per_cycle":  2,      # nb_bits of input/cycle (treated as DAC resolution)
-        "group_depth":          1,      # m factor
+        "input_precision":      4,      # activation precision
+        "weight_precision":     4,      # weight precision
+        "input_bit_per_cycle":  1,      # nb_bits of input/cycle (treated as DAC resolution)
+        "group_depth":          group_depth,      # m factor
         "adc_resolution":       8,      # ADC resolution
         "wordline_dimension":   "D1",   # hardware dimension where wordline is (corresponds to the served dimension of input regs)
         "bitline_dimension":    "D2",   # hardware dimension where bitline is (corresponds to the served dimension of output regs)
@@ -216,8 +216,8 @@ def imc_array_dut():
 
     return aimc_array
 
-def cores_dut():
-    imc_array1 = imc_array_dut()
+def cores_dut(group_depth):
+    imc_array1 = imc_array_dut(group_depth)
     memory_hierarchy1 = memory_hierarchy_dut(imc_array1)
 
     core1 = Core(1, imc_array1, memory_hierarchy1)
@@ -225,6 +225,9 @@ def cores_dut():
     return {core1}
 
 
-cores = cores_dut()
-acc_name = os.path.basename(__file__)[:-3]
-accelerator = Accelerator(acc_name, cores)
+def get_accelerator(group_depth):
+    cores = cores_dut(group_depth)
+    acc_name = os.path.basename(__file__)[:-3]
+    accelerator = Accelerator(acc_name, cores)
+
+    return accelerator

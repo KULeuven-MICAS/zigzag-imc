@@ -40,7 +40,7 @@ class MatMulParser(Parser):
             B = B  # Not to be confused with operand 'B' which is the weights
             d["loop_dim_size"] = {"K": K, "C": C, "B": B}
             d["dimension_relations"] = []
-            d["operand_precision"] = {"O": 16, "O_final": 8, "B": 8, "A": 8}
+            d["operand_precision"] = {"O": 16, "O_final": 4, "B": 4, "A": 4}
             d["operand_source"] = {"B": [], "A": []}
             d["constant_operands"] = ["B"]
 

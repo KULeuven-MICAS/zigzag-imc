@@ -146,13 +146,11 @@ class PickleSaveStage(Stage):
             print('mem_energy',sum([ sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1]) for x in all_cmes]))
             print('MAC energy',sum([ sum([v for v in x.MAC_energy_breakdown.values()]) for x in all_cmes]))
             print('weight energy', sum([x.mem_energy_breakdown['W'][0] for x in all_cmes]))
-            breakpoint()
             print('ideal_cycles', sum([x.ideal_temporal_cycle for x in all_cmes]))
             print('Stalls', [x.SS_comb for x in all_cmes])
  
 
             print(f'EDP {cost:.2e}')
-            breakpoint()
         except:
             pass
         if not os.path.exists(dirname):
