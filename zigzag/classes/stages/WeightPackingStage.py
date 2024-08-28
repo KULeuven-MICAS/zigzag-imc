@@ -77,7 +77,8 @@ class WeightPackingStage(Stage):
             bin_dict, solver_status, not_allocated_item_pool = macro_bin.macro_allocation(column_list)
             #bin_dict, solver_status = macro_bin.pack_macrobin(column_list, fsi, zsl, ol, nki)
             self.generate_mappings(network, item_pool)
-            if solver_status in ['OPTIMAL','FEASIBLE']:
+            print(solver_status)
+            if True:#solver_status in ['OPTIMAL','FEASIBLE']:
                 #plot_item_allocation(column_list, bin_dict, D3=int(D3), height=int(M), D1=int(D1),D2=int(D2))
                 #utilization = self.get_utilization(item_pool) / D1 / D2 / D3 
                 cost, cme_list = self.get_cost(kwargs, {},{})
@@ -174,9 +175,9 @@ class WeightPackingStage(Stage):
         try:
             cost = sum([(sum([v for v in x.MAC_energy_breakdown.values()]) + sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1])) * x.ideal_temporal_cycle for x in cme_list])
 #            print(cme_list[0].imc_area)
-            print('Weight breakdown', [x.mem_energy_breakdown['W'] for x in cme_list])
-            print('mem_energy',sum([ sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1]) for x in cme_list]))
-            print('MAC energy',sum([ sum([v for v in x.MAC_energy_breakdown.values()]) for x in cme_list]))
+            #print('Weight breakdown', [x.mem_energy_breakdown['W'] for x in cme_list])
+            #print('mem_energy',sum([ sum(x.mem_energy_breakdown['I'][:-1]) + sum(x.mem_energy_breakdown['O'][:-1]) for x in cme_list]))
+            #print('MAC energy',sum([ sum([v for v in x.MAC_energy_breakdown.values()]) for x in cme_list]))
             mac_energy = {}
             for k in cme_list[0].MAC_energy_breakdown.keys():
                 mac_energy[k] = 0
@@ -184,10 +185,10 @@ class WeightPackingStage(Stage):
                     for kk, vv in x.MAC_energy_breakdown.items():
                         if kk == k:
                             mac_energy[kk] += vv
-            print('MAC_ENERGY',mac_energy)
-            print('weight total energy', [sum(x.mem_energy_breakdown['W']) for x in cme_list])
+            #print('MAC_ENERGY',mac_energy)
+            #print('weight total energy', [sum(x.mem_energy_breakdown['W']) for x in cme_list])
 #            print('weight cell energy',sum([x.mem_energy_breakdown['W'][0] for x in cme_list]))
-            print('ideal_cycles', sum([x.ideal_temporal_cycle for x in cme_list]))
+            #print('ideal_cycles', sum([x.ideal_temporal_cycle for x in cme_list]))
 
             print()
             print(f'EDP {cost:.2e}')
