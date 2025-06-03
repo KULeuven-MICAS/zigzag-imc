@@ -4,6 +4,19 @@ This extension is specifically designed to support In-Memory Computing (IMC).
 ZigZag-IMC bridges the gap between algorithmic DL decisions and their IMC acceleration cost on specialized accelerators through a fast and accurate HW cost estimation. 
 
 ## Important Notice
+
+#### **2025/6/3**:
+
+- Since the [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag) has undergone several maintenance updates, some features and supporting materials related to IMC (In-Memory Computing) modeling are missing. Therefore, please feel free to use this repository for posting issues and running IMC simulations.
+- The links to the IMC papers/videos/slides/posters have been removed from the [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag). If you are looking for details on the modeling methodology, please refer to the resources linked at the bottom of this page.
+
+The comparison between this ZigZag-IMC repository and the ZigZag framework is tabulated below.
+
+| Framework                                                    | Same                                         | Diff                                                                                                                                                  |
+|:-------------------------------------------------------------|:---------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag) | support both digital and IMC architecture    | does not support diagonal spatial unrolling and multi-dimensional spatial unrolling (can only unroll C or FX or FY along the same hardware dimension) |
+| ZigZag-IMC                                                   | support both digital and IMC architecture    | support diagonal spatial unrolling and multi-dimensional spatial unrolling (e.g., unroll C, FX, FY in together along the same hardware dimension)     |
+
 #### **2024/3/14**:
 
 - Considering ZigZag-IMC framework is an enhanced version of ZigZag framework, we have merged this ZigZag-IMC repository with the [ZigZag framework](https://github.com/KULeuven-MICAS/zigzag) for an easy maintenance. 
